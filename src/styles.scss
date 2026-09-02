@@ -1,0 +1,58 @@
+@use 'bandeira-ui/styles';
+@use 'bandeira-shell/styles/palette-contract' as shell;
+@use 'tailwindcss';
+
+:root {
+  --bd-primary: #2f6f6b;
+  --bd-primary-strong: #245652;
+  --bd-primary-soft: rgba(47, 111, 107, 0.14);
+  --bd-primary-contrast: #fbfdfc;
+  --bs-sidebar-bg: #1d3a37;
+  --bs-sidebar-bg-hover: #274b47;
+  --bs-sidebar-fg: #eaf3f1;
+  --bs-sidebar-fg-muted: #a9c3c0;
+  --bs-sidebar-accent: var(--bd-accent);
+}
+
+@include shell.bs-palette(
+  'calmo',
+  $primary: #2f6f6b,
+  $primary-strong: #245652,
+  $primary-soft: rgba(47, 111, 107, 0.14),
+  $primary-contrast: #fbfdfc,
+  $sidebar-bg: #1d3a37,
+  $sidebar-bg-hover: #274b47,
+  $sidebar-fg: #eaf3f1,
+  $sidebar-fg-muted: #a9c3c0,
+  $dark-primary: #5aa39e,
+  $dark-primary-strong: #468e89,
+  $dark-primary-soft: rgba(90, 163, 158, 0.18),
+  $dark-primary-contrast: #0d1e1c
+);
+
+@theme {
+  --color-bg: var(--bd-bg);
+  --color-surface: var(--bd-surface);
+  --color-surface-hover: var(--bd-surface-hover);
+  --color-border: var(--bd-border);
+  --color-border-strong: var(--bd-border-strong);
+  --color-fg: var(--bd-fg);
+  --color-fg-muted: var(--bd-fg-muted);
+  --color-fg-subtle: var(--bd-fg-subtle);
+  --color-primary: var(--bd-primary);
+  --color-primary-strong: var(--bd-primary-strong);
+  --color-primary-soft: var(--bd-primary-soft);
+  --color-primary-contrast: var(--bd-primary-contrast);
+  --radius-radius: var(--bd-radius);
+}
+
+button[bdButton],
+a[bdButton] {
+  border-radius: 999px !important;
+}
+
+@utility card {
+  background-color: var(--bd-surface);
+  border: 1px solid var(--bd-border);
+  border-radius: 20px;
+}

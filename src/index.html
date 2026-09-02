@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <title>Renda Viva</title>
+    <base href="/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/x-icon" href="favicon.ico" />
+
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem('theme');
+          if (!t) t = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+          document.documentElement.setAttribute('data-theme', t);
+
+          var validPalettes = ['calmo'];
+          var p = localStorage.getItem('palette');
+          if (validPalettes.indexOf(p) === -1) p = 'calmo';
+          document.documentElement.setAttribute('data-palette', p);
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <app-root></app-root>
+  </body>
+</html>

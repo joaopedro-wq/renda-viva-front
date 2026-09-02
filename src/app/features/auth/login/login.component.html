@@ -1,0 +1,38 @@
+<div class="min-h-screen flex items-center justify-center bg-bg p-6">
+  <form
+    class="card w-full max-w-sm flex flex-col gap-5 p-8"
+    (ngSubmit)="submit()"
+  >
+    <div class="text-center">
+      <h1 class="text-2xl font-black text-fg">Renda Viva</h1>
+      <p class="text-sm text-fg-muted mt-1">Entre pra ver quanto dá pra gastar essa semana.</p>
+    </div>
+
+    <bd-field label="E-mail">
+      <input bdInput type="email" name="email" [(ngModel)]="email" required autocomplete="email" />
+    </bd-field>
+
+    <bd-field label="Senha">
+      <input
+        bdInput
+        type="password"
+        name="password"
+        [(ngModel)]="password"
+        required
+        autocomplete="current-password"
+      />
+    </bd-field>
+
+    @if (erro()) {
+      <p class="text-sm text-[var(--bd-danger)]" role="alert">{{ erro() }}</p>
+    }
+
+    <button bdButton type="submit" [disabled]="loading()" [attr.aria-busy]="loading()">
+      {{ loading() ? 'Entrando...' : 'Entrar' }}
+    </button>
+
+    <p class="text-center text-sm text-fg-muted">
+      Ainda não tem conta? <a routerLink="/registrar" class="font-bold text-primary">Criar conta</a>
+    </p>
+  </form>
+</div>

@@ -1,0 +1,50 @@
+<div class="min-h-screen flex items-center justify-center bg-bg p-6">
+  <form class="card w-full max-w-sm flex flex-col gap-5 p-8" (ngSubmit)="submit()">
+    <div class="text-center">
+      <h1 class="text-2xl font-black text-fg">Criar conta</h1>
+      <p class="text-sm text-fg-muted mt-1">Leva menos de um minuto.</p>
+    </div>
+
+    <bd-field label="Nome">
+      <input bdInput type="text" name="name" [(ngModel)]="name" required autocomplete="name" />
+    </bd-field>
+
+    <bd-field label="E-mail">
+      <input bdInput type="email" name="email" [(ngModel)]="email" required autocomplete="email" />
+    </bd-field>
+
+    <bd-field label="Senha">
+      <input
+        bdInput
+        type="password"
+        name="password"
+        [(ngModel)]="password"
+        required
+        autocomplete="new-password"
+      />
+    </bd-field>
+
+    <bd-field label="Confirmar senha">
+      <input
+        bdInput
+        type="password"
+        name="passwordConfirmation"
+        [(ngModel)]="passwordConfirmation"
+        required
+        autocomplete="new-password"
+      />
+    </bd-field>
+
+    @if (erro()) {
+      <p class="text-sm text-[var(--bd-danger)]" role="alert">{{ erro() }}</p>
+    }
+
+    <button bdButton type="submit" [disabled]="loading()" [attr.aria-busy]="loading()">
+      {{ loading() ? 'Criando...' : 'Criar conta' }}
+    </button>
+
+    <p class="text-center text-sm text-fg-muted">
+      Já tem conta? <a routerLink="/login" class="font-bold text-primary">Entrar</a>
+    </p>
+  </form>
+</div>

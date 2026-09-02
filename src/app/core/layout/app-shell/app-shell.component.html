@@ -1,0 +1,29 @@
+<bs-shell>
+  <a bsShellBrand routerLink="/dashboard" class="logo">
+    <span class="word">renda viva</span>
+  </a>
+
+  <div bsShellGreeting class="greeting">
+    Olá{{ primeiroNome() ? ', ' + primeiroNome() : '' }}
+  </div>
+
+  <div bsShellTopActions>
+    <button
+      bdButton
+      variant="ghost"
+      size="sm"
+      iconOnly
+      aria-label="Sair"
+      (click)="logout()"
+    >
+      <svg lucideLogOut size="16" aria-hidden="true"></svg>
+    </button>
+  </div>
+
+  <div bsShellSidebarFooter class="sidebar-foot">
+    <bd-avatar [name]="auth.currentUser()?.name ?? '?'" size="sm" />
+    <span class="txt">
+      <b>{{ auth.currentUser()?.name ?? 'Conta' }}</b>
+    </span>
+  </div>
+</bs-shell>
