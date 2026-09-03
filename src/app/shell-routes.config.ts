@@ -1,2 +1,1 @@
-
-export const ROTAS_RAIZ = ['/dashboard', '/login', '/'];
+export const ROTAS_RAIZ = ['/dashboard', '/rendas', '/gastos', '/obrigacoes-fixas', '/login', '/'];

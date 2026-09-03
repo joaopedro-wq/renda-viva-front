@@ -1,0 +1,101 @@
+<bd-page-header
+  title="Obrigações fixas"
+  description="Aluguel, assinaturas — sempre descontadas primeiro no cálculo semanal."
+/>
+
+<div class="grid gap-6 lg:grid-cols-[360px_1fr] mt-6">
+  <bd-card>
+    <form class="flex flex-col gap-4" (ngSubmit)="salvar()">
+      <h2 class="text-lg font-bold text-fg">
+        {{ editandoId() ? 'Editar obrigação' : 'Nova obrigação fixa' }}
+      </h2>
+
+      <bd-field label="Descrição">
+        <input
+          bdInput
+          type="text"
+          name="descricao"
+          [(ngModel)]="form.descricao"
+          required
+          placeholder="Aluguel, internet..."
+        />
+      </bd-field>
+
+      <bd-field label="Valor">
+        <input
+          bdInput
+          type="number"
+          name="valor"
+          [(ngModel)]="form.valor"
+          required
+          min="0.01"
+          step="0.01"
+        />
+      </bd-field>
+
+      <bd-field label="Dia do vencimento" hint="Entre 1 e 31">
+        <input
+          bdInput
+          type="number"
+          name="dia_vencimento"
+          [(ngModel)]="form.dia_vencimento"
+          required
+          min="1"
+          max="31"
+        />
+      </bd-field>
+
+      <bd-checkbox name="ativa" [(checked)]="form.ativa"
+        >Ativa (entra no cálculo semanal)</bd-checkbox
+      >
+
+      @if (erro()) {
+        <bd-alert tone="danger">{{ erro() }}</bd-alert>
+      }
+
+      <div class="flex gap-2">
+        <button bdButton type="submit" [loading]="salvando()" class="flex-1">
+          {{ editandoId() ? 'Salvar alterações' : 'Adicionar obrigação' }}
+        </button>
+        @if (editandoId()) {
+          <button bdButton type="button" variant="ghost" (click)="cancelarEdicao()">
+            Cancelar
+          </button>
+        }
+      </div>
+    </form>
+  </bd-card>
+
+  <div class="flex flex-col gap-3">
+    @if (carregando()) {
+      <bd-card><p class="text-sm text-fg-muted">Carregando...</p></bd-card>
+    } @else if (obrigacoes().length === 0) {
+      <bd-empty-state
+        icon="🏠"
+        title="Nenhuma obrigação fixa ainda"
+        description="Adicione a primeira pelo formulário ao lado."
+      />
+    } @else {
+      @for (obrigacao of obrigacoes(); track obrigacao.id) {
+        <bd-card class="flex items-center justify-between gap-4">
+          <div>
+            <p class="font-bold text-fg">
+              {{ obrigacao.descricao }}
+              @if (!obrigacao.ativa) {
+                <span class="text-fg-muted font-normal">(inativa)</span>
+              }
+            </p>
+            <p class="text-sm text-fg-muted">Vence todo dia {{ obrigacao.dia_vencimento }}</p>
+          </div>
+          <div class="flex items-center gap-3">
+            <p class="font-bold text-fg whitespace-nowrap">R$ {{ obrigacao.valor }}</p>
+            <button bdButton variant="ghost" size="sm" (click)="editar(obrigacao)">Editar</button>
+            <button bdButton variant="danger" size="sm" (click)="excluir(obrigacao)">
+              Excluir
+            </button>
+          </div>
+        </bd-card>
+      }
+    }
+  </div>
+</div>

@@ -32,6 +32,21 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/dashboard/dashboard.component').then((m) => m.DashboardComponent),
       },
+      {
+        path: 'rendas',
+        loadComponent: () =>
+          import('./features/rendas/rendas.component').then((m) => m.RendasComponent),
+      },
+      {
+        path: 'gastos',
+        loadComponent: () =>
+          import('./features/gastos/gastos.component').then((m) => m.GastosComponent),
+      },
+      {
+        path: 'obrigacoes-fixas',
+        loadComponent: () =>
+          import('./features/obrigacoes/obrigacoes.component').then((m) => m.ObrigacoesComponent),
+      },
     ],
   },
 ];

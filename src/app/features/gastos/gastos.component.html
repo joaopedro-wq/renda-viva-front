@@ -1,0 +1,86 @@
+<bd-page-header title="Gastos" description="Seus lançamentos de gasto — categoria é opcional." />
+
+<div class="grid gap-6 lg:grid-cols-[360px_1fr] mt-6">
+  <bd-card>
+    <form class="flex flex-col gap-4" (ngSubmit)="salvar()">
+      <h2 class="text-lg font-bold text-fg">
+        {{ editandoId() ? 'Editar gasto' : 'Novo gasto' }}
+      </h2>
+
+      <bd-field label="Descrição">
+        <input bdInput type="text" name="descricao" [(ngModel)]="form.descricao" required />
+      </bd-field>
+
+      <bd-field label="Valor">
+        <input
+          bdInput
+          type="number"
+          name="valor"
+          [(ngModel)]="form.valor"
+          required
+          min="0.01"
+          step="0.01"
+        />
+      </bd-field>
+
+      <bd-field label="Data">
+        <input bdInput type="date" name="data" [(ngModel)]="form.data" required />
+      </bd-field>
+
+      <bd-field label="Categoria" hint="Opcional">
+        <select bdInput name="categoria_gasto_id" [(ngModel)]="form.categoria_gasto_id">
+          <option [ngValue]="null">Sem categoria</option>
+          @for (categoria of categorias(); track categoria.id) {
+            <option [ngValue]="categoria.id">{{ categoria.nome }}</option>
+          }
+        </select>
+      </bd-field>
+
+      @if (erro()) {
+        <bd-alert tone="danger">{{ erro() }}</bd-alert>
+      }
+
+      <div class="flex gap-2">
+        <button bdButton type="submit" [loading]="salvando()" class="flex-1">
+          {{ editandoId() ? 'Salvar alterações' : 'Adicionar gasto' }}
+        </button>
+        @if (editandoId()) {
+          <button bdButton type="button" variant="ghost" (click)="cancelarEdicao()">
+            Cancelar
+          </button>
+        }
+      </div>
+    </form>
+  </bd-card>
+
+  <div class="flex flex-col gap-3">
+    @if (carregando()) {
+      <bd-card><p class="text-sm text-fg-muted">Carregando...</p></bd-card>
+    } @else if (gastos().length === 0) {
+      <bd-empty-state
+        icon="🛒"
+        title="Nenhum gasto lançado ainda"
+        description="Adicione o primeiro pelo formulário ao lado."
+      />
+    } @else {
+      @for (gasto of gastos(); track gasto.id) {
+        <bd-card class="flex items-center justify-between gap-4">
+          <div>
+            <p class="font-bold text-fg">{{ gasto.descricao }}</p>
+            <p class="text-sm text-fg-muted">
+              {{ gasto.data }}
+              @if (nomeCategoria(gasto.categoria_gasto_id); as nome) {
+                · {{ nome }}
+              }
+            </p>
+          </div>
+          <div class="flex items-center gap-3">
+            <p class="font-bold text-fg whitespace-nowrap">R$ {{ gasto.valor }}</p>
+            <button bdButton variant="ghost" size="sm" (click)="editar(gasto)">Editar</button>
+            <button bdButton variant="danger" size="sm" (click)="excluir(gasto)">Excluir</button>
+          </div>
+        </bd-card>
+      }
+    }
+  </div>
+</div>

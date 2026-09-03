@@ -1,20 +1,43 @@
 <div class="mx-auto flex max-w-2xl flex-col gap-6">
+  @if (erro()) {
+    <bd-alert tone="danger">{{ erro() }}</bd-alert>
+  }
+
   <section class="card flex flex-col items-center gap-2 p-10 text-center">
     <span class="text-sm font-bold uppercase tracking-wide text-fg-muted">
       Dá pra gastar essa semana
     </span>
-    <span class="text-6xl font-black tabular-nums text-primary">R$ 0,00</span>
+    @if (carregando()) {
+      <span class="text-6xl font-black tabular-nums text-fg-muted">···</span>
+    } @else {
+      <span class="text-6xl font-black tabular-nums text-primary">
+        R$ {{ dado()?.valor_seguro_semana ?? '0.00' }}
+      </span>
+    }
     <p class="mt-2 max-w-sm text-sm text-fg-muted">
-      Assim que você lançar sua primeira renda, esse número passa a valer — sempre baseado no que já
-      entrou, nunca no que é esperado.
+      @if (dado()) {
+        Baseado no que já entrou este mês (R$ {{ dado()!.renda_recebida_mes }}), menos obrigações
+        fixas e gastos já lançados, dividido pelas {{ dado()!.semanas_restantes }} semana(s) que
+        restam no mês.
+      } @else {
+        Assim que você lançar sua primeira renda, esse número passa a valer — sempre baseado no que
+        já entrou, nunca no que é esperado.
+      }
     </p>
   </section>
 
   <section class="card flex flex-col gap-3 p-6">
     <h2 class="text-sm font-bold uppercase tracking-wide text-fg-muted">Colchão</h2>
     <div class="h-3 w-full overflow-hidden rounded-full bg-surface-hover">
-      <div class="h-full w-0 rounded-full bg-primary transition-all"></div>
+      <div
+        class="h-full rounded-full bg-primary transition-all"
+        [class.w-full]="colchaoPositivo()"
+        [class.w-0]="!colchaoPositivo()"
+      ></div>
     </div>
+    @if (dado(); as d) {
+      <p class="text-2xl font-black tabular-nums text-fg">R$ {{ d.saldo_colchao }}</p>
+    }
     <p class="text-sm text-fg-muted">
       Uma fatia dos meses bons fica guardada aqui pra sustentar os meses mais fracos — sem juntar,
       sem número mágico.
@@ -23,9 +46,19 @@
 
   <section class="card flex flex-col gap-2 p-6">
     <h2 class="text-sm font-bold uppercase tracking-wide text-fg-muted">Sua história do mês</h2>
-    <p class="text-sm text-fg-muted">
-      Ainda sem lançamentos este mês — quando tiver, aqui aparece um resumo em texto, não um painel
-      de gráficos.
-    </p>
+    @if (carregandoHistoria()) {
+      <p class="text-sm text-fg-muted">Carregando...</p>
+    } @else if (historia(); as h) {
+      <p class="text-sm text-fg-muted">{{ h.fraseResumo }}</p>
+      @if (h.fraseCategoria) {
+        <p class="text-sm text-fg-muted">{{ h.fraseCategoria }}</p>
+      }
+      <p class="text-sm text-fg-muted">{{ h.fraseColchao }}</p>
+    } @else {
+      <p class="text-sm text-fg-muted">
+        Ainda sem lançamentos este mês — quando tiver, aqui aparece um resumo em texto, não um
+        painel de gráficos.
+      </p>
+    }
   </section>
 </div>

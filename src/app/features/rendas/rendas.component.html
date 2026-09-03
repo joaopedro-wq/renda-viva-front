@@ -1,0 +1,99 @@
+<bd-page-header
+  title="Rendas"
+  description="Seus lançamentos de renda — a data é sempre a do dinheiro já recebido."
+/>
+
+<div class="grid gap-6 lg:grid-cols-[360px_1fr] mt-6">
+  <bd-card>
+    <form class="flex flex-col gap-4" (ngSubmit)="salvar()">
+      <h2 class="text-lg font-bold text-fg">
+        {{ editandoId() ? 'Editar renda' : 'Nova renda' }}
+      </h2>
+
+      <bd-field label="Descrição">
+        <input bdInput type="text" name="descricao" [(ngModel)]="form.descricao" required />
+      </bd-field>
+
+      <bd-field label="Fonte">
+        <input
+          bdInput
+          type="text"
+          name="fonte"
+          [(ngModel)]="form.fonte"
+          required
+          placeholder="Freela, Uber, venda..."
+        />
+      </bd-field>
+
+      <bd-field label="Valor">
+        <input
+          bdInput
+          type="number"
+          name="valor"
+          [(ngModel)]="form.valor"
+          required
+          min="0.01"
+          step="0.01"
+        />
+      </bd-field>
+
+      <bd-field label="Data de recebimento">
+        <input
+          bdInput
+          type="date"
+          name="data_recebimento"
+          [(ngModel)]="form.data_recebimento"
+          required
+        />
+      </bd-field>
+
+      <bd-checkbox name="recorrente" [(checked)]="form.recorrente">Renda recorrente</bd-checkbox>
+
+      @if (erro()) {
+        <bd-alert tone="danger">{{ erro() }}</bd-alert>
+      }
+
+      <div class="flex gap-2">
+        <button bdButton type="submit" [loading]="salvando()" class="flex-1">
+          {{ editandoId() ? 'Salvar alterações' : 'Adicionar renda' }}
+        </button>
+        @if (editandoId()) {
+          <button bdButton type="button" variant="ghost" (click)="cancelarEdicao()">
+            Cancelar
+          </button>
+        }
+      </div>
+    </form>
+  </bd-card>
+
+  <div class="flex flex-col gap-3">
+    @if (carregando()) {
+      <bd-card><p class="text-sm text-fg-muted">Carregando...</p></bd-card>
+    } @else if (rendas().length === 0) {
+      <bd-empty-state
+        icon="💰"
+        title="Nenhuma renda lançada ainda"
+        description="Adicione a primeira renda pelo formulário ao lado."
+      />
+    } @else {
+      @for (renda of rendas(); track renda.id) {
+        <bd-card class="flex items-center justify-between gap-4">
+          <div>
+            <p class="font-bold text-fg">{{ renda.descricao }}</p>
+            <p class="text-sm text-fg-muted">
+              {{ renda.fonte }} · {{ renda.data_recebimento }}
+              @if (renda.recorrente) {
+                · recorrente
+              }
+            </p>
+          </div>
+          <div class="flex items-center gap-3">
+            <p class="font-bold text-fg whitespace-nowrap">R$ {{ renda.valor }}</p>
+            <button bdButton variant="ghost" size="sm" (click)="editar(renda)">Editar</button>
+            <button bdButton variant="danger" size="sm" (click)="excluir(renda)">Excluir</button>
+          </div>
+        </bd-card>
+      }
+    }
+  </div>
+</div>

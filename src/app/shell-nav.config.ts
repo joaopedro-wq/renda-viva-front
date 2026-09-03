@@ -1,6 +1,9 @@
 import type { ShellNavItem } from 'bandeira-shell';
-import { LucideHouse } from '@lucide/angular';
+import { LucideBanknote, LucideHouse, LucideReceipt, LucideShoppingCart } from '@lucide/angular';
 
 export const NAV_ITEMS: ShellNavItem[] = [
   { path: '/dashboard', label: 'Painel', icon: LucideHouse },
+  { path: '/rendas', label: 'Rendas', icon: LucideBanknote },
+  { path: '/gastos', label: 'Gastos', icon: LucideShoppingCart },
+  { path: '/obrigacoes-fixas', label: 'Obrigações fixas', icon: LucideReceipt },
 ];
