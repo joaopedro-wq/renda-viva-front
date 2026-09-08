@@ -8,6 +8,7 @@ import {
   output,
   signal,
 } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
   BdAlertComponent,
@@ -19,6 +20,8 @@ import {
   LucideArrowUpRight,
   LucideBriefcase,
   LucideCar,
+  LucideChevronDown,
+  LucideChevronUp,
   LucideClock,
   LucideEllipsis,
   LucideGamepad2,
@@ -34,6 +37,7 @@ import {
   LucideRepeat,
   LucideSearch,
   LucideShoppingBag,
+  LucideSparkles,
   LucideShoppingCart,
   LucideTrendingUp,
   LucideUtensils,
@@ -49,7 +53,9 @@ import type {
   LinhaRevisao,
   MapeamentoPayload,
   ResultadoConfirmacao,
+  TipoLancamento,
 } from '../data/importacao.model';
+import { SelectInlineComponent, type OpcaoSelectInline } from './select-inline.component';
 
 type Etapa = 'mapeando' | 'revisando' | 'concluido';
 
@@ -89,14 +95,18 @@ const MAPEAMENTO_VAZIO: MapeamentoPayload = {
   selector: 'app-form-importacao',
   standalone: true,
   imports: [
+    NgTemplateOutlet,
     FormsModule,
     BdAlertComponent,
     BdButtonComponent,
     BdFieldComponent,
     BdInputComponent,
+    SelectInlineComponent,
     LucideArrowUpRight,
     LucideBriefcase,
     LucideCar,
+    LucideChevronDown,
+    LucideChevronUp,
     LucideClock,
     LucideEllipsis,
     LucideGamepad2,
@@ -114,6 +124,7 @@ const MAPEAMENTO_VAZIO: MapeamentoPayload = {
     LucideShoppingCart,
     LucideTrendingUp,
     LucideShoppingBag,
+    LucideSparkles,
     LucideUtensils,
     LucideWallet,
   ],
@@ -127,6 +138,22 @@ export class FormImportacaoComponent implements OnInit {
 
   protected readonly categoriasGasto = this.categoriaGastoService.categorias;
   protected readonly categoriasRenda = this.categoriaRendaService.categorias;
+
+  protected readonly opcoesTipo: OpcaoSelectInline[] = [
+    { valor: 'renda', rotulo: 'Renda', cor: 'var(--bd-primary)' },
+    { valor: 'gasto', rotulo: 'Gasto', cor: 'var(--bd-danger)' },
+    { valor: 'ignorar', rotulo: 'Ignorar', cor: 'var(--bd-fg-subtle)' },
+  ];
+
+  protected readonly opcoesCategoriaGasto = computed<OpcaoSelectInline[]>(() => [
+    { valor: null, rotulo: 'Sem categoria' },
+    ...this.categoriasGasto().map((c) => ({ valor: c.id, rotulo: c.nome, cor: c.cor })),
+  ]);
+
+  protected readonly opcoesCategoriaRenda = computed<OpcaoSelectInline[]>(() => [
+    { valor: null, rotulo: 'Sem categoria' },
+    ...this.categoriasRenda().map((c) => ({ valor: c.id, rotulo: c.nome, cor: c.cor })),
+  ]);
 
   /** Arquivo já enviado pra `ImportacaoComponent` — reenviado aqui se o usuário reformular o mapeamento. */
   readonly arquivo = input.required<File>();
@@ -173,6 +200,9 @@ export class FormImportacaoComponent implements OnInit {
 
   protected readonly filtro = signal('');
 
+  /** Folha de resumo do mobile (fechada por padrão) — não existe equivalente no desktop. */
+  protected readonly resumoAberto = signal(false);
+
   private readonly linhasFiltradas = computed(() => {
     const termo = this.filtro().trim().toLowerCase();
 
@@ -195,6 +225,30 @@ export class FormImportacaoComponent implements OnInit {
 
   protected readonly totalIgnoradas = computed(
     () => this.linhas().length - this.linhasIncluidas().length,
+  );
+
+  private readonly totalIgnoradasValor = computed(() =>
+    this.linhas()
+      .filter((l) => l.tipo === 'ignorar')
+      .reduce((soma, l) => soma + Math.abs(l.valor), 0),
+  );
+
+  /** Proporção de cada grupo sobre o total movimentado no extrato — vira a barrinha do resumo. */
+  protected readonly composicao = computed(() => {
+    const total = this.totalRenda() + this.totalGasto() + this.totalIgnoradasValor();
+
+    if (total === 0) return { renda: 0, gasto: 0, ignorada: 0 };
+
+    return {
+      renda: (this.totalRenda() / total) * 100,
+      gasto: (this.totalGasto() / total) * 100,
+      ignorada: (this.totalIgnoradasValor() / total) * 100,
+    };
+  });
+
+  /** Quantas linhas continuam exatamente como a sugestão automática chegou — pra mostrar no banner. */
+  protected readonly sugestoesAplicadas = computed(
+    () => this.linhas().filter((l) => this.ehSugestao(l)).length,
   );
 
   /** Agrupa preservando a ordem em que as linhas chegam — o extrato já vem cronológico. */
@@ -303,7 +357,14 @@ export class FormImportacaoComponent implements OnInit {
     this.voltar.emit();
   }
 
-  /** Chute inicial pra facilitar o mapeamento manual — usuário confirma/corrige. */
+  protected definirTipo(linha: LinhaRevisao, tipo: TipoLancamento): void {
+    this.linhas.update((atual) => atual.map((l) => (l === linha ? { ...l, tipo } : l)));
+  }
+
+  protected definirCategoria(linha: LinhaRevisao, categoriaId: number | null): void {
+    this.linhas.update((atual) => atual.map((l) => (l === linha ? { ...l, categoriaId } : l)));
+  }
+
   private sugerirMapeamento(cabecalho: string[]): MapeamentoPayload {
     const encontrar = (candidatos: string[]) =>
       cabecalho.find((coluna) => candidatos.some((c) => coluna.toLowerCase().includes(c))) ?? '';
@@ -316,6 +377,21 @@ export class FormImportacaoComponent implements OnInit {
       coluna_identificador: encontrar(['identificador']) || null,
       formato_data: 'd/m/Y',
     };
+  }
+
+  protected descricaoExibida(linha: LinhaRevisao): string {
+    const partes = linha.descricao.split(' - ');
+    const ultima = partes[partes.length - 1].trim();
+
+    return partes.length > 1 && ultima ? ultima : linha.descricao;
+  }
+
+  protected ehSugestao(linha: LinhaRevisao): boolean {
+    return (
+      linha.motivo === null &&
+      linha.tipo === linha.tipo_sugerido &&
+      linha.categoriaId === linha.categoria_sugerida_id
+    );
   }
 
   protected categoriaGasto(id: number | null) {
@@ -339,18 +415,35 @@ export class FormImportacaoComponent implements OnInit {
     return '#8a8a8a';
   }
 
-  protected estiloTipoBg(linha: LinhaRevisao): string {
-    if (linha.tipo === 'renda') return 'rgba(22, 163, 74, .1)';
-    if (linha.tipo === 'gasto') return 'rgba(47, 111, 107, .1)';
+  /** Mesmo padrão de sinal + formatação do resumo e do saldo por dia — nunca o valor cru do back. */
+  protected formatarValor(linha: LinhaRevisao): string {
+    const absoluto = Math.abs(linha.valor).toFixed(2);
 
-    return '#f1f3f9';
+    if (linha.tipo === 'ignorar') return `R$ ${absoluto}`;
+
+    return `${linha.tipo === 'renda' ? '+' : '−'} R$ ${absoluto}`;
+  }
+
+  /**
+   * Renda usa a cor da paleta ativa (`--bd-primary`) em vez de verde — segue a paleta escolhida
+   * (Índigo, Calmo, Coral...) e o tema claro/escuro de graça. Gasto é sempre vermelho (`--bd-danger`).
+   */
+  protected corTipo(linha: LinhaRevisao): string {
+    if (linha.tipo === 'renda') return 'var(--bd-primary)';
+    if (linha.tipo === 'gasto') return 'var(--bd-danger)';
+
+    return 'var(--bd-fg-muted)';
+  }
+
+  protected estiloTipoBg(linha: LinhaRevisao): string {
+    if (linha.tipo === 'renda') return 'var(--bd-primary-soft)';
+    if (linha.tipo === 'gasto') return 'var(--bd-danger-soft)';
+
+    return 'var(--bd-surface-hover)';
   }
 
   protected estiloTipoCor(linha: LinhaRevisao): string {
-    if (linha.tipo === 'renda') return '#166534';
-    if (linha.tipo === 'gasto') return '#245652';
-
-    return '#545c70';
+    return this.corTipo(linha);
   }
 
   private formatarData(data: string): string {

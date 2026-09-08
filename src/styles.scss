@@ -2,7 +2,6 @@
 @use 'bandeira-shell/styles/palette-contract' as shell;
 @use 'tailwindcss';
 
-
 :root {
   --bd-primary: #4b4a9e;
   --bd-primary-strong: #3a3980;
@@ -169,4 +168,28 @@ a[bdButton] {
   outline: none;
   border-color: var(--bd-primary, #3d5ce8);
   box-shadow: var(--bd-focus-ring, 0 0 0 3px rgba(61, 92, 232, 0.1));
+}
+
+.scroll-suave {
+  scrollbar-width: thin;
+  scrollbar-color: var(--bd-border-strong) transparent;
+}
+
+.scroll-suave::-webkit-scrollbar {
+  width: 8px;
+}
+
+.scroll-suave::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scroll-suave::-webkit-scrollbar-thumb {
+  background-color: var(--bd-border-strong);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.scroll-suave::-webkit-scrollbar-thumb:hover {
+  background-color: var(--bd-fg-subtle);
 }

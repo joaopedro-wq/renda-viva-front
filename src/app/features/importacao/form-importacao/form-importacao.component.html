@@ -98,16 +98,31 @@
 
   @case ('revisando') {
     <div
-      class="mx-auto grid w-full max-w-6xl grid-cols-1 gap-6 lg:grid-cols-[1fr_320px] lg:items-start"
+      class="mx-auto grid w-full max-w-6xl grid-cols-1 gap-6 pb-20 lg:h-[calc(100vh-14rem)] lg:grid-cols-[1fr_320px] lg:items-start lg:pb-0"
     >
-      <!-- coluna principal -->
-      <div class="flex flex-col gap-5 min-w-0">
+      <!-- coluna principal — só ela rola no desktop, o resumo fica parado -->
+      <div
+        class="scroll-suave flex min-w-0 flex-col gap-5 lg:h-full lg:self-stretch lg:overflow-y-auto lg:pr-5"
+      >
         <div class="flex flex-wrap items-center justify-between gap-3">
           <h2 class="text-lg font-bold text-fg">Revise antes de confirmar</h2>
-          <span class="text-sm text-fg-muted"
+          <span class="rounded-full bg-primary-soft px-3 py-1 text-xs font-bold text-primary"
             >{{ linhasIncluidas().length }} de {{ linhas().length }} incluídas</span
           >
         </div>
+
+        @if (sugestoesAplicadas() > 0) {
+          <div
+            class="flex items-center gap-2.5 rounded-2xl border border-primary bg-primary-soft p-3.5"
+          >
+            <svg lucideSparkles size="16" class="shrink-0 text-primary"></svg>
+            <p class="text-xs font-semibold text-primary">
+              {{ sugestoesAplicadas() }}
+              {{ sugestoesAplicadas() === 1 ? 'sugestão já aplicada' : 'sugestões já aplicadas' }}
+              automaticamente — revise só o que quiser mudar.
+            </p>
+          </div>
+        }
 
         <div class="relative">
           <svg
@@ -119,7 +134,7 @@
             bdInput
             type="text"
             placeholder="Buscar por descrição..."
-            class="pl-9"
+            style="padding-left: 2.25rem"
             [ngModel]="filtro()"
             (ngModelChange)="filtro.set($event)"
             [ngModelOptions]="{ standalone: true }"
@@ -147,170 +162,212 @@
                 </span>
               </div>
 
-              <div class="app-card divide-y divide-border overflow-hidden">
+              <div
+                class="flex flex-col gap-2 sm:app-card sm:gap-0 sm:divide-y sm:divide-border sm:overflow-hidden"
+              >
                 @for (linha of grupo.linhas; track $index) {
                   <div
-                    class="flex flex-wrap items-center gap-3 p-3.5 sm:flex-nowrap"
+                    class="card flex flex-wrap items-center justify-between gap-3 p-3.5 transition-colors hover:bg-surface-hover sm:rounded-none sm:border-0 sm:bg-transparent"
                     [class.opacity-50]="linha.tipo === 'ignorar'"
                   >
-                    <span
-                      class="grid h-10 w-10 shrink-0 place-items-center rounded-xl"
-                      [style.background]="corAvatar(linha) + '1f'"
-                    >
-                      @switch (true) {
-                        @case (linha.motivo === 'par_lavado') {
-                          <svg lucideRefreshCw size="17" [style.color]="corAvatar(linha)"></svg>
-                        }
-                        @case (linha.motivo === 'ja_importado') {
-                          <svg lucideClock size="17" [style.color]="corAvatar(linha)"></svg>
-                        }
-                        @case (linha.tipo === 'renda' && !!categoriaRenda(linha.categoriaId)) {
-                          @switch (categoriaRenda(linha.categoriaId)?.icone) {
-                            @case ('briefcase') {
-                              <svg lucideBriefcase size="17" [style.color]="corAvatar(linha)"></svg>
-                            }
-                            @case ('laptop') {
-                              <svg lucideLaptop size="17" [style.color]="corAvatar(linha)"></svg>
-                            }
-                            @case ('shopping-cart') {
-                              <svg
-                                lucideShoppingCart
-                                size="17"
-                                [style.color]="corAvatar(linha)"
-                              ></svg>
-                            }
-                            @case ('percent') {
-                              <svg lucidePercent size="17" [style.color]="corAvatar(linha)"></svg>
-                            }
-                            @case ('trending-up') {
-                              <svg
-                                lucideTrendingUp
-                                size="17"
-                                [style.color]="corAvatar(linha)"
-                              ></svg>
-                            }
-                            @default {
-                              <svg lucideEllipsis size="17" [style.color]="corAvatar(linha)"></svg>
-                            }
-                          }
-                        }
-                        @case (linha.tipo === 'renda') {
-                          <svg lucideArrowUpRight size="17" [style.color]="corAvatar(linha)"></svg>
-                        }
-                        @case (linha.tipo === 'gasto' && !!categoriaGasto(linha.categoriaId)) {
-                          @switch (categoriaGasto(linha.categoriaId)?.icone) {
-                            @case ('utensils') {
-                              <svg lucideUtensils size="17" [style.color]="corAvatar(linha)"></svg>
-                            }
-                            @case ('home') {
-                              <svg lucideHouse size="17" [style.color]="corAvatar(linha)"></svg>
-                            }
-                            @case ('car') {
-                              <svg lucideCar size="17" [style.color]="corAvatar(linha)"></svg>
-                            }
-                            @case ('heart-pulse') {
-                              <svg
-                                lucideHeartPulse
-                                size="17"
-                                [style.color]="corAvatar(linha)"
-                              ></svg>
-                            }
-                            @case ('gamepad-2') {
-                              <svg lucideGamepad2 size="17" [style.color]="corAvatar(linha)"></svg>
-                            }
-                            @case ('graduation-cap') {
-                              <svg
-                                lucideGraduationCap
-                                size="17"
-                                [style.color]="corAvatar(linha)"
-                              ></svg>
-                            }
-                            @case ('shopping-bag') {
-                              <svg
-                                lucideShoppingBag
-                                size="17"
-                                [style.color]="corAvatar(linha)"
-                              ></svg>
-                            }
-                            @case ('repeat') {
-                              <svg lucideRepeat size="17" [style.color]="corAvatar(linha)"></svg>
-                            }
-                            @case ('heart') {
-                              <svg lucideHeart size="17" [style.color]="corAvatar(linha)"></svg>
-                            }
-                            @default {
-                              <svg lucideEllipsis size="17" [style.color]="corAvatar(linha)"></svg>
-                            }
-                          }
-                        }
-                        @default {
-                          <svg lucideReceipt size="17" [style.color]="corAvatar(linha)"></svg>
-                        }
-                      }
-                    </span>
-
-                    <div class="min-w-0 flex-1">
-                      <p class="truncate text-sm font-semibold text-fg">{{ linha.descricao }}</p>
-                      @if (linha.motivo === 'par_lavado') {
-                        <p class="text-xs text-fg-subtle">par lavado</p>
-                      } @else if (linha.motivo === 'ja_importado') {
-                        <p class="text-xs text-fg-subtle">já importado</p>
-                      } @else if (
-                        linha.tipo === 'gasto' && categoriaGasto(linha.categoriaId);
-                        as cat
-                      ) {
-                        <p class="text-xs text-fg-muted">{{ cat.nome }}</p>
-                      } @else if (
-                        linha.tipo === 'renda' && categoriaRenda(linha.categoriaId);
-                        as cat
-                      ) {
-                        <p class="text-xs text-[#16a34a] font-semibold">{{ cat.nome }}</p>
-                      } @else if (linha.tipo === 'renda') {
-                        <p class="text-xs text-[#16a34a] font-semibold">Renda</p>
-                      }
-                    </div>
-
-                    <div class="flex shrink-0 flex-col items-end gap-1.5">
-                      <span class="text-sm font-bold text-fg tabular-nums"
-                        >R$ {{ linha.valor }}</span
+                    <div class="flex w-full min-w-0 items-center gap-3 sm:w-auto sm:flex-1">
+                      <span
+                        class="grid h-10 w-10 shrink-0 place-items-center rounded-xl"
+                        [style.background]="corAvatar(linha) + '1f'"
                       >
-                      <div class="flex items-center gap-1.5">
-                        <select
-                          class="rounded-full border-0 py-1 pl-2.5 pr-6 text-xs font-semibold"
-                          [style.background]="estiloTipoBg(linha)"
-                          [style.color]="estiloTipoCor(linha)"
-                          [(ngModel)]="linha.tipo"
-                          [ngModelOptions]="{ standalone: true }"
-                        >
-                          <option value="renda">Renda</option>
-                          <option value="gasto">Gasto</option>
-                          <option value="ignorar">Ignorar</option>
-                        </select>
+                        @switch (true) {
+                          @case (linha.motivo === 'par_lavado') {
+                            <svg lucideRefreshCw size="17" [style.color]="corAvatar(linha)"></svg>
+                          }
+                          @case (linha.motivo === 'ja_importado') {
+                            <svg lucideClock size="17" [style.color]="corAvatar(linha)"></svg>
+                          }
+                          @case (linha.tipo === 'renda' && !!categoriaRenda(linha.categoriaId)) {
+                            @switch (categoriaRenda(linha.categoriaId)?.icone) {
+                              @case ('briefcase') {
+                                <svg
+                                  lucideBriefcase
+                                  size="17"
+                                  [style.color]="corAvatar(linha)"
+                                ></svg>
+                              }
+                              @case ('laptop') {
+                                <svg lucideLaptop size="17" [style.color]="corAvatar(linha)"></svg>
+                              }
+                              @case ('shopping-cart') {
+                                <svg
+                                  lucideShoppingCart
+                                  size="17"
+                                  [style.color]="corAvatar(linha)"
+                                ></svg>
+                              }
+                              @case ('percent') {
+                                <svg lucidePercent size="17" [style.color]="corAvatar(linha)"></svg>
+                              }
+                              @case ('trending-up') {
+                                <svg
+                                  lucideTrendingUp
+                                  size="17"
+                                  [style.color]="corAvatar(linha)"
+                                ></svg>
+                              }
+                              @default {
+                                <svg
+                                  lucideEllipsis
+                                  size="17"
+                                  [style.color]="corAvatar(linha)"
+                                ></svg>
+                              }
+                            }
+                          }
+                          @case (linha.tipo === 'renda') {
+                            <svg
+                              lucideArrowUpRight
+                              size="17"
+                              [style.color]="corAvatar(linha)"
+                            ></svg>
+                          }
+                          @case (linha.tipo === 'gasto' && !!categoriaGasto(linha.categoriaId)) {
+                            @switch (categoriaGasto(linha.categoriaId)?.icone) {
+                              @case ('utensils') {
+                                <svg
+                                  lucideUtensils
+                                  size="17"
+                                  [style.color]="corAvatar(linha)"
+                                ></svg>
+                              }
+                              @case ('home') {
+                                <svg lucideHouse size="17" [style.color]="corAvatar(linha)"></svg>
+                              }
+                              @case ('car') {
+                                <svg lucideCar size="17" [style.color]="corAvatar(linha)"></svg>
+                              }
+                              @case ('heart-pulse') {
+                                <svg
+                                  lucideHeartPulse
+                                  size="17"
+                                  [style.color]="corAvatar(linha)"
+                                ></svg>
+                              }
+                              @case ('gamepad-2') {
+                                <svg
+                                  lucideGamepad2
+                                  size="17"
+                                  [style.color]="corAvatar(linha)"
+                                ></svg>
+                              }
+                              @case ('graduation-cap') {
+                                <svg
+                                  lucideGraduationCap
+                                  size="17"
+                                  [style.color]="corAvatar(linha)"
+                                ></svg>
+                              }
+                              @case ('shopping-bag') {
+                                <svg
+                                  lucideShoppingBag
+                                  size="17"
+                                  [style.color]="corAvatar(linha)"
+                                ></svg>
+                              }
+                              @case ('repeat') {
+                                <svg lucideRepeat size="17" [style.color]="corAvatar(linha)"></svg>
+                              }
+                              @case ('heart') {
+                                <svg lucideHeart size="17" [style.color]="corAvatar(linha)"></svg>
+                              }
+                              @default {
+                                <svg
+                                  lucideEllipsis
+                                  size="17"
+                                  [style.color]="corAvatar(linha)"
+                                ></svg>
+                              }
+                            }
+                          }
+                          @default {
+                            <svg lucideReceipt size="17" [style.color]="corAvatar(linha)"></svg>
+                          }
+                        }
+                      </span>
 
-                        @if (linha.tipo === 'gasto') {
-                          <select
-                            class="select-nativo rounded-full border-border py-1 pl-2.5 pr-6 text-xs"
-                            [(ngModel)]="linha.categoriaId"
-                            [ngModelOptions]="{ standalone: true }"
-                          >
-                            <option [ngValue]="null">Sem categoria</option>
-                            @for (categoria of categoriasGasto(); track categoria.id) {
-                              <option [ngValue]="categoria.id">{{ categoria.nome }}</option>
+                      <div class="min-w-0 flex-1">
+                        <p class="truncate text-sm font-semibold text-fg" [title]="linha.descricao">
+                          {{ descricaoExibida(linha) }}
+                        </p>
+                        @if (linha.motivo === 'par_lavado') {
+                          <p class="text-xs text-fg-subtle">par lavado</p>
+                        } @else if (linha.motivo === 'ja_importado') {
+                          <p class="text-xs text-fg-subtle">já importado</p>
+                        } @else if (
+                          linha.tipo === 'gasto' && categoriaGasto(linha.categoriaId);
+                          as cat
+                        ) {
+                          <p class="flex items-center gap-1.5 text-xs text-fg-muted">
+                            <span
+                              class="h-1.5 w-1.5 shrink-0 rounded-full"
+                              [style.background]="cat.cor"
+                            ></span>
+                            {{ cat.nome }}
+                            @if (ehSugestao(linha)) {
+                              <svg lucideSparkles size="11" class="text-primary"></svg>
                             }
-                          </select>
+                          </p>
+                        } @else if (
+                          linha.tipo === 'renda' && categoriaRenda(linha.categoriaId);
+                          as cat
+                        ) {
+                          <p class="flex items-center gap-1.5 text-xs font-semibold text-primary">
+                            <span
+                              class="h-1.5 w-1.5 shrink-0 rounded-full"
+                              [style.background]="cat.cor"
+                            ></span>
+                            {{ cat.nome }}
+                            @if (ehSugestao(linha)) {
+                              <svg lucideSparkles size="11" class="text-primary"></svg>
+                            }
+                          </p>
                         } @else if (linha.tipo === 'renda') {
-                          <select
-                            class="select-nativo rounded-full border-border py-1 pl-2.5 pr-6 text-xs"
-                            [(ngModel)]="linha.categoriaId"
-                            [ngModelOptions]="{ standalone: true }"
-                          >
-                            <option [ngValue]="null">Sem categoria</option>
-                            @for (categoria of categoriasRenda(); track categoria.id) {
-                              <option [ngValue]="categoria.id">{{ categoria.nome }}</option>
+                          <p class="flex items-center gap-1 text-xs font-semibold text-primary">
+                            Renda
+                            @if (ehSugestao(linha)) {
+                              <svg lucideSparkles size="11" class="text-primary"></svg>
                             }
-                          </select>
+                          </p>
                         }
                       </div>
+                    </div>
+
+                    <span
+                      class="text-base font-bold tabular-nums sm:text-sm"
+                      [style.color]="corTipo(linha)"
+                      >{{ formatarValor(linha) }}</span
+                    >
+
+                    <!-- rodapé — no mobile fica ao lado do valor; no desktop vira uma faixa
+                         própria abaixo, com os selects na ponta direita -->
+                    <div class="flex items-center gap-1.5 sm:w-full sm:justify-end">
+                      <app-select-inline
+                        [opcoes]="opcoesTipo"
+                        [valor]="linha.tipo"
+                        [corFundo]="estiloTipoBg(linha)"
+                        [corTexto]="estiloTipoCor(linha)"
+                        (valorChange)="definirTipo(linha, $any($event))"
+                      />
+
+                      @if (linha.tipo === 'gasto') {
+                        <app-select-inline
+                          [opcoes]="opcoesCategoriaGasto()"
+                          [valor]="linha.categoriaId"
+                          (valorChange)="definirCategoria(linha, $any($event))"
+                        />
+                      } @else if (linha.tipo === 'renda') {
+                        <app-select-inline
+                          [opcoes]="opcoesCategoriaRenda()"
+                          [valor]="linha.categoriaId"
+                          (valorChange)="definirCategoria(linha, $any($event))"
+                        />
+                      }
                     </div>
                   </div>
                 }
@@ -320,6 +377,47 @@
         </div>
       </div>
 
+      <!-- composição + totais — compartilhado entre o card fixo (desktop) e a folha (mobile) -->
+      <ng-template #resumoConteudo>
+        <div>
+          <div class="flex h-2 overflow-hidden rounded-full bg-surface-hover">
+            <span class="h-full bg-primary" [style.width.%]="composicao().renda"></span>
+            <span class="h-full bg-[var(--bd-danger)]" [style.width.%]="composicao().gasto"></span>
+            <span class="h-full bg-border-strong" [style.width.%]="composicao().ignorada"></span>
+          </div>
+          <div class="mt-2 flex justify-between text-[11px] text-fg-subtle">
+            <span class="flex items-center gap-1.5"
+              ><span class="h-1.5 w-1.5 rounded-full bg-primary"></span>Rendas</span
+            >
+            <span class="flex items-center gap-1.5"
+              ><span class="h-1.5 w-1.5 rounded-full bg-[var(--bd-danger)]"></span>Gastos</span
+            >
+            <span class="flex items-center gap-1.5"
+              ><span class="h-1.5 w-1.5 rounded-full bg-border-strong"></span>Ignoradas</span
+            >
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-2.5">
+          <div class="flex items-center justify-between">
+            <span class="text-sm text-fg-muted">Rendas</span>
+            <span class="text-sm font-bold text-primary tabular-nums"
+              >+ R$ {{ totalRenda().toFixed(2) }}</span
+            >
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-sm text-fg-muted">Gastos</span>
+            <span class="text-sm font-bold text-[var(--bd-danger)] tabular-nums"
+              >− R$ {{ totalGasto().toFixed(2) }}</span
+            >
+          </div>
+          <div class="flex items-center justify-between border-t border-border pt-2.5">
+            <span class="text-sm text-fg-muted">Ignoradas</span>
+            <span class="text-sm font-bold text-fg tabular-nums">{{ totalIgnoradas() }}</span>
+          </div>
+        </div>
+      </ng-template>
+
       <!-- painel lateral — fixo em desktop -->
       <div class="flex flex-col gap-4 lg:sticky lg:top-6">
         <div class="app-card flex flex-col gap-4 p-6">
@@ -328,26 +426,9 @@
             <p class="text-xs font-bold uppercase tracking-wide text-fg-muted">Resumo</p>
           </div>
 
-          <div class="flex flex-col gap-2.5">
-            <div class="flex items-center justify-between">
-              <span class="text-sm text-fg-muted">Rendas</span>
-              <span class="text-sm font-bold text-[#16a34a] tabular-nums"
-                >+ R$ {{ totalRenda().toFixed(2) }}</span
-              >
-            </div>
-            <div class="flex items-center justify-between">
-              <span class="text-sm text-fg-muted">Gastos</span>
-              <span class="text-sm font-bold text-[#dc2626] tabular-nums"
-                >− R$ {{ totalGasto().toFixed(2) }}</span
-              >
-            </div>
-            <div class="flex items-center justify-between border-t border-border pt-2.5">
-              <span class="text-sm text-fg-muted">Ignoradas</span>
-              <span class="text-sm font-bold text-fg tabular-nums">{{ totalIgnoradas() }}</span>
-            </div>
-          </div>
+          <ng-container *ngTemplateOutlet="resumoConteudo"></ng-container>
 
-          <div class="flex flex-col gap-2">
+          <div class="hidden flex-col gap-2 lg:flex">
             <button bdButton [loading]="enviando()" (click)="confirmarImportacao()">
               Confirmar ({{ linhasIncluidas().length }})
             </button>
@@ -377,6 +458,53 @@
               novo não duplica.
             </p>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- folha de resumo — só no mobile: fechada é só uma barra fina, puxa pra cima pra ver o resumo completo -->
+    @if (resumoAberto()) {
+      <div
+        class="fixed inset-0 z-[80] bg-black/40 lg:hidden"
+        (click)="resumoAberto.set(false)"
+      ></div>
+    }
+
+    <div
+      class="fixed inset-x-0 bottom-0 z-[90] rounded-t-3xl border border-border bg-surface shadow-lg lg:hidden"
+    >
+      <button
+        type="button"
+        class="flex w-full flex-col items-center gap-1.5 pt-2.5 pb-1.5"
+        [attr.aria-expanded]="resumoAberto()"
+        (click)="resumoAberto.set(!resumoAberto())"
+      >
+        <span class="h-1 w-9 rounded-full bg-border-strong"></span>
+        <span class="flex items-center gap-1 text-[11px] font-semibold text-fg-muted">
+          {{ resumoAberto() ? 'Ocultar resumo' : 'Ver resumo' }}
+          @if (resumoAberto()) {
+            <svg lucideChevronDown size="13"></svg>
+          } @else {
+            <svg lucideChevronUp size="13"></svg>
+          }
+        </span>
+      </button>
+
+      @if (resumoAberto()) {
+        <div class="flex flex-col gap-4 border-t border-border px-4 pt-3.5 pb-1">
+          <ng-container *ngTemplateOutlet="resumoConteudo"></ng-container>
+        </div>
+      }
+
+      <div class="flex items-center justify-between gap-3 p-3.5">
+        <span class="text-xs font-semibold text-fg-muted"
+          >{{ linhasIncluidas().length }} de {{ linhas().length }} incluídas</span
+        >
+        <div class="flex gap-2">
+          <button bdButton variant="ghost" (click)="cancelar()">Cancelar</button>
+          <button bdButton [loading]="enviando()" (click)="confirmarImportacao()">
+            Confirmar ({{ linhasIncluidas().length }})
+          </button>
         </div>
       </div>
     </div>
