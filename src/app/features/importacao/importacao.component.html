@@ -1,60 +1,19 @@
 <bd-page-header
   title="Importar extrato"
-  description="Suba o CSV do banco em vez de lançar linha por linha — você revisa e confirma antes de qualquer coisa ser gravada."
+  description="Suba o CSV do seu banco em vez de lançar linha por linha. Nada é gravado até você revisar e confirmar."
 />
 
 <div class="app-card mt-6 flex flex-col gap-6 p-5 sm:p-8">
   @if (estadoInicial(); as estado) {
     <app-form-importacao [arquivo]="arquivo()!" [estadoInicial]="estado" (voltar)="reiniciar()" />
   } @else {
-    @if (erro()) {
-      <div class="mx-auto w-full max-w-2xl">
-        <bd-alert tone="danger">{{ erro() }}</bd-alert>
-      </div>
-    }
-
-    <div class="mx-auto w-full max-w-2xl">
-      <div class="app-card items-center p-6 text-center">
-        <div class="flex flex-col items-center gap-4 py-4">
-          <span class="grid h-14 w-14 place-items-center rounded-2xl bg-primary-soft">
-            <svg lucideCloudUpload size="26" class="text-primary"></svg>
-          </span>
-
-          <div>
-            <p class="text-sm font-bold text-fg">Solte ou escolha o arquivo do seu banco</p>
-            <p class="mt-1 text-xs text-fg-muted">CSV — o mesmo que você baixa do extrato</p>
-          </div>
-
-          <input
-            #inputArquivo
-            type="file"
-            accept=".csv,.txt"
-            class="hidden"
-            (change)="selecionarArquivo($event)"
-          />
-
-          <button
-            bdButton
-            variant="subtle"
-            type="button"
-            class="w-full"
-            (click)="inputArquivo.click()"
-          >
-            {{ nomeArquivoSelecionado() ?? 'Escolher arquivo' }}
-          </button>
-
-          <button
-            bdButton
-            type="button"
-            class="w-full"
-            [disabled]="!nomeArquivoSelecionado()"
-            [loading]="enviando()"
-            (click)="enviarArquivo()"
-          >
-            Enviar arquivo
-          </button>
-        </div>
-      </div>
-    </div>
+    <app-upload-extrato
+      [estado]="estadoEnvio()"
+      [percentual]="percentual()"
+      [nomeArquivo]="nomeArquivoSelecionado()"
+      [erro]="erro()"
+      (arquivoSelecionado)="selecionarArquivo($event)"
+      (arrastandoChange)="onArrastandoChange($event)"
+    />
   }
 </div>

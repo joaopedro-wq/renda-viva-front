@@ -17,5 +17,6 @@ export const apiPaths = {
   movimentosColchao: () => `${environment.apiBaseUrl}/movimentos-colchao`,
   painelDadoDaSemana: () => `${environment.apiBaseUrl}/painel/dado-da-semana`,
   importacoesPreVisualizar: () => `${environment.apiBaseUrl}/importacoes/pre-visualizar`,
+  importacoesUploadChunk: () => `${environment.apiBaseUrl}/importacoes/upload-chunk`,
   importacoesConfirmar: () => `${environment.apiBaseUrl}/importacoes/confirmar`,
 };

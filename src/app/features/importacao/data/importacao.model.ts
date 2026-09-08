@@ -70,3 +70,10 @@ export interface ResultadoConfirmacao {
 export type EstadoInicialImportacao =
   | { tipo: 'mapear'; cabecalho: string[] }
   | { tipo: 'revisar'; linhas: LinhaRevisao[] };
+
+export type EstadoEnvio = 'ocioso' | 'arrastando' | 'enviando' | 'processando' | 'erro';
+export type UploadChunkResponse = { recebido: true } | PreVisualizarResponse;
+
+export type EventoUploadChunk =
+  | { tipo: 'progresso'; percentual: number }
+  | { tipo: 'concluido'; resposta: PreVisualizarResponse };
