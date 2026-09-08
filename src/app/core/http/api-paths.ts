@@ -13,6 +13,9 @@ export const apiPaths = {
   obrigacoesFixas: (id?: number) =>
     `${environment.apiBaseUrl}/obrigacoes-fixas${id ? `/${id}` : ''}`,
   categoriasGasto: () => `${environment.apiBaseUrl}/categorias-gasto`,
+  categoriasRenda: () => `${environment.apiBaseUrl}/categorias-renda`,
   movimentosColchao: () => `${environment.apiBaseUrl}/movimentos-colchao`,
   painelDadoDaSemana: () => `${environment.apiBaseUrl}/painel/dado-da-semana`,
+  importacoesPreVisualizar: () => `${environment.apiBaseUrl}/importacoes/pre-visualizar`,
+  importacoesConfirmar: () => `${environment.apiBaseUrl}/importacoes/confirmar`,
 };

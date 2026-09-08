@@ -47,6 +47,11 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/obrigacoes/obrigacoes.component').then((m) => m.ObrigacoesComponent),
       },
+      {
+        path: 'importacao',
+        loadComponent: () =>
+          import('./features/importacao/importacao.component').then((m) => m.ImportacaoComponent),
+      },
     ],
   },
 ];

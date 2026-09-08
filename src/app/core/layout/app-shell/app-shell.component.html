@@ -1,21 +1,36 @@
 <bs-shell>
   <a bsShellBrand routerLink="/dashboard" class="logo">
+    <svg class="mark" width="26" height="26" viewBox="0 0 40 40" aria-hidden="true">
+      <rect class="badge" width="40" height="40" rx="12" fill="var(--bd-primary)" />
+      <path
+        class="leaf leaf-left"
+        d="M20 30 C14 30 10 24 12 16 C18 18 20 24 20 30 Z"
+        fill="var(--bd-primary-contrast)"
+      />
+      <path
+        class="leaf leaf-right"
+        d="M20 30 C26 30 30 24 28 16 C22 18 20 24 20 30 Z"
+        fill="var(--bd-primary-contrast)"
+        opacity="0.75"
+      />
+      <line
+        class="stem"
+        x1="20"
+        y1="30"
+        x2="20"
+        y2="33"
+        stroke="var(--bd-primary-contrast)"
+        stroke-width="2.4"
+        stroke-linecap="round"
+      />
+    </svg>
     <span class="word">renda viva</span>
   </a>
 
-  <div bsShellGreeting class="greeting">
-    Olá{{ primeiroNome() ? ', ' + primeiroNome() : '' }}
-  </div>
+  <div bsShellGreeting class="greeting">Olá{{ primeiroNome() ? ', ' + primeiroNome() : '' }}</div>
 
   <div bsShellTopActions>
-    <button
-      bdButton
-      variant="ghost"
-      size="sm"
-      iconOnly
-      aria-label="Sair"
-      (click)="logout()"
-    >
+    <button bdButton variant="ghost" size="sm" iconOnly aria-label="Sair" (click)="logout()">
       <svg lucideLogOut size="16" aria-hidden="true"></svg>
     </button>
   </div>

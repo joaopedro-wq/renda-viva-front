@@ -1,22 +1,30 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { forkJoin } from 'rxjs';
 import {
   BdAlertComponent,
   BdButtonComponent,
   BdCardComponent,
+  BdChipComponent,
   BdCheckboxComponent,
   BdEmptyStateComponent,
   BdFieldComponent,
   BdInputComponent,
   BdPageHeaderComponent,
+  BdRevealDirective,
+  BdSkeletonComponent,
 } from 'bandeira-ui';
 
+import { CategoriaIconComponent } from '../../core/catalog/categoria-icon.component';
+import { CategoriaRendaService } from '../../core/catalog/categoria-renda.service';
+import type { CategoriaRenda } from '../../core/catalog/categoria-renda.model';
 import { RendaService } from './data/renda.service';
 import type { Renda, RendaPayload } from './data/renda.model';
 
 const FORM_VAZIO: RendaPayload = {
   descricao: '',
   fonte: '',
+  categoria_renda_id: null,
   valor: 0,
   data_recebimento: '',
   recorrente: false,
@@ -30,19 +38,25 @@ const FORM_VAZIO: RendaPayload = {
     BdAlertComponent,
     BdButtonComponent,
     BdCardComponent,
+    BdChipComponent,
     BdCheckboxComponent,
     BdEmptyStateComponent,
     BdFieldComponent,
     BdInputComponent,
     BdPageHeaderComponent,
+    BdRevealDirective,
+    BdSkeletonComponent,
+    CategoriaIconComponent,
   ],
   templateUrl: './rendas.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RendasComponent implements OnInit {
   private readonly rendaService = inject(RendaService);
+  private readonly categoriaRendaService = inject(CategoriaRendaService);
 
   protected readonly rendas = this.rendaService.rendas;
+  protected readonly categorias = this.categoriaRendaService.categorias;
   protected readonly carregando = signal(true);
   protected readonly salvando = signal(false);
   protected readonly erro = signal<string | null>(null);
@@ -52,7 +66,7 @@ export class RendasComponent implements OnInit {
   protected form: RendaPayload = { ...FORM_VAZIO };
 
   ngOnInit(): void {
-    this.rendaService.listar().subscribe({
+    forkJoin([this.rendaService.listar(), this.categoriaRendaService.listar()]).subscribe({
       next: () => this.carregando.set(false),
       error: () => {
         this.carregando.set(false);
@@ -61,11 +75,20 @@ export class RendasComponent implements OnInit {
     });
   }
 
+  nomeCategoria(id: number | null): string | null {
+    return this.categorias().find((c) => c.id === id)?.nome ?? null;
+  }
+
+  categoriaDe(id: number | null): CategoriaRenda | null {
+    return this.categorias().find((c) => c.id === id) ?? null;
+  }
+
   editar(renda: Renda): void {
     this.editandoId.set(renda.id);
     this.form = {
       descricao: renda.descricao,
       fonte: renda.fonte,
+      categoria_renda_id: renda.categoria_renda_id,
       valor: Number(renda.valor),
       data_recebimento: renda.data_recebimento,
       recorrente: renda.recorrente,

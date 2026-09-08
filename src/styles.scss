@@ -2,15 +2,16 @@
 @use 'bandeira-shell/styles/palette-contract' as shell;
 @use 'tailwindcss';
 
+
 :root {
-  --bd-primary: #2f6f6b;
-  --bd-primary-strong: #245652;
-  --bd-primary-soft: rgba(47, 111, 107, 0.14);
-  --bd-primary-contrast: #fbfdfc;
-  --bs-sidebar-bg: #1d3a37;
-  --bs-sidebar-bg-hover: #274b47;
-  --bs-sidebar-fg: #eaf3f1;
-  --bs-sidebar-fg-muted: #a9c3c0;
+  --bd-primary: #4b4a9e;
+  --bd-primary-strong: #3a3980;
+  --bd-primary-soft: rgba(75, 74, 158, 0.14);
+  --bd-primary-contrast: #f9f9fd;
+  --bs-sidebar-bg: #201f42;
+  --bs-sidebar-bg-hover: #2b2a52;
+  --bs-sidebar-fg: #ecebf8;
+  --bs-sidebar-fg-muted: #b3b2dd;
   --bs-sidebar-accent: var(--bd-accent);
 }
 
@@ -30,8 +31,73 @@
   $dark-primary-contrast: #0d1e1c
 );
 
+@include shell.bs-palette(
+  'indigo',
+  $primary: #4b4a9e,
+  $primary-strong: #3a3980,
+  $primary-soft: rgba(75, 74, 158, 0.14),
+  $primary-contrast: #f9f9fd,
+  $sidebar-bg: #201f42,
+  $sidebar-bg-hover: #2b2a52,
+  $sidebar-fg: #ecebf8,
+  $sidebar-fg-muted: #b3b2dd,
+  $dark-primary: #8988cf,
+  $dark-primary-strong: #7473bb,
+  $dark-primary-soft: rgba(137, 136, 207, 0.18),
+  $dark-primary-contrast: #131230
+);
+
+@include shell.bs-palette(
+  'coral',
+  $primary: #c65a5a,
+  $primary-strong: #a34747,
+  $primary-soft: rgba(198, 90, 90, 0.14),
+  $primary-contrast: #fdf7f7,
+  $sidebar-bg: #3a1f1f,
+  $sidebar-bg-hover: #4a2929,
+  $sidebar-fg: #f6e6e6,
+  $sidebar-fg-muted: #d1a2a2,
+  $dark-primary: #e18c8c,
+  $dark-primary-strong: #cb7676,
+  $dark-primary-soft: rgba(225, 140, 140, 0.18),
+  $dark-primary-contrast: #1f1010
+);
+
+@include shell.bs-palette(
+  'ardosia',
+  $primary: #c05a4e,
+  $primary-strong: #9c473d,
+  $primary-soft: rgba(192, 90, 78, 0.14),
+  $primary-contrast: #fdf8f7,
+  $sidebar-bg: #26282c,
+  $sidebar-bg-hover: #33363b,
+  $sidebar-fg: #eceded,
+  $sidebar-fg-muted: #a7abb3,
+  $dark-primary: #d98277,
+  $dark-primary-strong: #c26f64,
+  $dark-primary-soft: rgba(217, 130, 119, 0.18),
+  $dark-primary-contrast: #16171a
+);
+
+@include shell.bs-palette(
+  'ameixa',
+  $primary: #7d4570,
+  $primary-strong: #653759,
+  $primary-soft: rgba(125, 69, 112, 0.14),
+  $primary-contrast: #fbf7fa,
+  $sidebar-bg: #301f2c,
+  $sidebar-bg-hover: #3f2938,
+  $sidebar-fg: #efe3ec,
+  $sidebar-fg-muted: #bd9bb3,
+  $dark-primary: #a877a0,
+  $dark-primary-strong: #93638b,
+  $dark-primary-soft: rgba(168, 119, 160, 0.18),
+  $dark-primary-contrast: #190f16
+);
+
 @theme {
   --color-bg: var(--bd-bg);
+  --color-bg-elevated: var(--bd-bg-elevated);
   --color-surface: var(--bd-surface);
   --color-surface-hover: var(--bd-surface-hover);
   --color-border: var(--bd-border);
@@ -55,4 +121,52 @@ a[bdButton] {
   background-color: var(--bd-surface);
   border: 1px solid var(--bd-border);
   border-radius: 20px;
+}
+
+/**
+ * `app-card` — container externo que envolve o conteúdo de uma tela (ex.
+ * importação), sem virar um "bloco" visual: nenhuma das outras telas do app
+ * pinta um fundo próprio atrás do conteúdo, então aqui também não — só a
+ * borda pra separar da área do cabeçalho, sem `background-color`. Um fundo
+ * sólido em --bd-bg (levemente azulado) ao lado do preto puro que o
+ * navegador pinta por padrão em `color-scheme: dark` lê como uma mancha
+ * azul; sem fundo, o conteúdo fica sobre o mesmo preto do resto do app.
+ * Não embute padding, igual ao `card`: sempre `class="app-card p-5 sm:p-8"`.
+ */
+@utility app-card {
+  border: 1px solid var(--bd-border);
+  border-radius: 24px;
+  transition: border-color 150ms ease;
+}
+
+/**
+ * `bd-input` (bandeira-ui) tem `template: ''` sem `<ng-content>` — funciona em
+ * `<input bdInput>`/`<textarea bdInput>` (sem filhos), mas em `<select bdInput>`
+ * o Angular descarta as `<option>` projetadas (não há outlet pra projetá-las),
+ * deixando o select sem nenhuma opção pra abrir. Nunca usar `bdInput` em
+ * `<select>` — usar esta classe, que replica o visual do `bd-input` sem
+ * depender do componente Angular.
+ */
+@utility select-nativo {
+  display: block;
+  width: 100%;
+  padding: var(--bd-space-3, 0.75rem) var(--bd-space-4, 1rem);
+  background: var(--bd-bg, #fff);
+  border: 1px solid var(--bd-border, #e3e7f0);
+  border-radius: var(--bd-radius-sm, 0.5rem);
+  color: var(--bd-fg, #10131c);
+  font-family: inherit;
+  font-size: var(--bd-text-base, 1rem);
+  line-height: var(--bd-leading-normal, 1.6);
+  cursor: pointer;
+}
+
+.select-nativo:hover:not(:disabled) {
+  border-color: var(--bd-border-strong, #cbd2e2);
+}
+
+.select-nativo:focus {
+  outline: none;
+  border-color: var(--bd-primary, #3d5ce8);
+  box-shadow: var(--bd-focus-ring, 0 0 0 3px rgba(61, 92, 232, 0.1));
 }

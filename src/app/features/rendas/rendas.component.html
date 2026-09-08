@@ -47,6 +47,19 @@
         />
       </bd-field>
 
+      <bd-field label="Categoria" hint="Opcional — pra saber o que é salário, freela, etc.">
+        <select
+          class="select-nativo"
+          name="categoria_renda_id"
+          [(ngModel)]="form.categoria_renda_id"
+        >
+          <option [ngValue]="null">Sem categoria</option>
+          @for (categoria of categorias(); track categoria.id) {
+            <option [ngValue]="categoria.id">{{ categoria.nome }}</option>
+          }
+        </select>
+      </bd-field>
+
       <bd-checkbox name="recorrente" [(checked)]="form.recorrente">Renda recorrente</bd-checkbox>
 
       @if (erro()) {
@@ -68,7 +81,15 @@
 
   <div class="flex flex-col gap-3">
     @if (carregando()) {
-      <bd-card><p class="text-sm text-fg-muted">Carregando...</p></bd-card>
+      @for (linha of [1, 2, 3]; track linha) {
+        <bd-card class="flex items-center gap-4">
+          <bd-skeleton variant="circle" width="40px" height="40px" />
+          <div class="flex flex-1 flex-col gap-2">
+            <bd-skeleton variant="text" width="40%" />
+            <bd-skeleton variant="text" width="65%" />
+          </div>
+        </bd-card>
+      }
     } @else if (rendas().length === 0) {
       <bd-empty-state
         icon="💰"
@@ -76,16 +97,31 @@
         description="Adicione a primeira renda pelo formulário ao lado."
       />
     } @else {
-      @for (renda of rendas(); track renda.id) {
-        <bd-card class="flex items-center justify-between gap-4">
-          <div>
-            <p class="font-bold text-fg">{{ renda.descricao }}</p>
-            <p class="text-sm text-fg-muted">
-              {{ renda.fonte }} · {{ renda.data_recebimento }}
-              @if (renda.recorrente) {
-                · recorrente
-              }
-            </p>
+      @for (renda of rendas(); track renda.id; let i = $index) {
+        <bd-card
+          interactive
+          bdReveal="up"
+          [revealDelay]="i * 60"
+          class="flex items-center justify-between gap-4"
+        >
+          <div class="flex min-w-0 items-center gap-3">
+            @if (categoriaDe(renda.categoria_renda_id); as categoria) {
+              <app-categoria-icon [icone]="categoria.icone" [cor]="categoria.cor" />
+            } @else {
+              <app-categoria-icon />
+            }
+            <div class="min-w-0">
+              <p class="truncate font-bold text-fg">{{ renda.descricao }}</p>
+              <p class="truncate text-sm text-fg-muted">
+                {{ renda.fonte }} · {{ renda.data_recebimento }}
+                @if (nomeCategoria(renda.categoria_renda_id); as nome) {
+                  · {{ nome }}
+                }
+              </p>
+            </div>
+            @if (renda.recorrente) {
+              <bd-chip tone="primary" outlined class="shrink-0">recorrente</bd-chip>
+            }
           </div>
           <div class="flex items-center gap-3">
             <p class="font-bold text-fg whitespace-nowrap">R$ {{ renda.valor }}</p>

@@ -1,14 +1,18 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { LucideReceipt } from '@lucide/angular';
 import {
   BdAlertComponent,
   BdButtonComponent,
   BdCardComponent,
+  BdChipComponent,
   BdCheckboxComponent,
   BdEmptyStateComponent,
   BdFieldComponent,
   BdInputComponent,
   BdPageHeaderComponent,
+  BdRevealDirective,
+  BdSkeletonComponent,
 } from 'bandeira-ui';
 
 import { ObrigacaoFixaService } from './data/obrigacao-fixa.service';
@@ -29,11 +33,15 @@ const FORM_VAZIO: ObrigacaoFixaPayload = {
     BdAlertComponent,
     BdButtonComponent,
     BdCardComponent,
+    BdChipComponent,
     BdCheckboxComponent,
     BdEmptyStateComponent,
     BdFieldComponent,
     BdInputComponent,
     BdPageHeaderComponent,
+    BdRevealDirective,
+    BdSkeletonComponent,
+    LucideReceipt,
   ],
   templateUrl: './obrigacoes.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,

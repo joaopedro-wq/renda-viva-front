@@ -6,7 +6,15 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { BdAlertComponent } from 'bandeira-ui';
+import {
+  BdAlertComponent,
+  BdCardComponent,
+  BdCountUpDirective,
+  BdMetricComponent,
+  BdProgressComponent,
+  BdRevealDirective,
+  BdSkeletonComponent,
+} from 'bandeira-ui';
 
 import { HistoriaDoMesService } from './data/historia-do-mes.service';
 import { PainelService } from './data/painel.service';
@@ -16,7 +24,15 @@ import type { HistoriaDoMes } from './data/historia-do-mes.model';
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [BdAlertComponent],
+  imports: [
+    BdAlertComponent,
+    BdCardComponent,
+    BdCountUpDirective,
+    BdMetricComponent,
+    BdProgressComponent,
+    BdRevealDirective,
+    BdSkeletonComponent,
+  ],
   templateUrl: './dashboard.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -37,6 +53,14 @@ export class DashboardComponent implements OnInit {
    * porcentagem de uma meta que ainda não existe.
    */
   protected readonly colchaoPositivo = computed(() => Number(this.dado()?.saldo_colchao ?? 0) > 0);
+
+  protected readonly valorSeguroSemana = computed(() =>
+    Number(this.dado()?.valor_seguro_semana ?? 0),
+  );
+  protected readonly rendaRecebidaMes = computed(() =>
+    Number(this.dado()?.renda_recebida_mes ?? 0),
+  );
+  protected readonly saldoColchao = computed(() => Number(this.dado()?.saldo_colchao ?? 0));
 
   ngOnInit(): void {
     this.painelService.buscarDadoDaSemana().subscribe({

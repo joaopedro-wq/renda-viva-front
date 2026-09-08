@@ -16,9 +16,13 @@ import {
   BdFieldComponent,
   BdInputComponent,
   BdPageHeaderComponent,
+  BdRevealDirective,
+  BdSkeletonComponent,
 } from 'bandeira-ui';
 
+import { CategoriaIconComponent } from '../../core/catalog/categoria-icon.component';
 import { CategoriaGastoService } from '../../core/catalog/categoria-gasto.service';
+import type { CategoriaGasto } from '../../core/catalog/categoria-gasto.model';
 import { GastoService } from './data/gasto.service';
 import type { Gasto, GastoPayload } from './data/gasto.model';
 
@@ -42,6 +46,9 @@ const FORM_VAZIO: GastoPayload = {
     BdFieldComponent,
     BdInputComponent,
     BdPageHeaderComponent,
+    BdRevealDirective,
+    BdSkeletonComponent,
+    CategoriaIconComponent,
   ],
   templateUrl: './gastos.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -63,6 +70,10 @@ export class GastosComponent implements OnInit {
     () => new Map(this.categorias().map((c) => [c.id, c.nome])),
   );
 
+  private readonly categoriaObjetoPorId = computed(
+    () => new Map(this.categorias().map((c) => [c.id, c])),
+  );
+
   ngOnInit(): void {
     forkJoin([this.gastoService.listar(), this.categoriaGastoService.listar()]).subscribe({
       next: () => this.carregando.set(false),
@@ -75,6 +86,10 @@ export class GastosComponent implements OnInit {
 
   nomeCategoria(id: number | null): string | null {
     return id ? (this.categoriasPorId().get(id) ?? null) : null;
+  }
+
+  categoriaDe(id: number | null): CategoriaGasto | null {
+    return id ? (this.categoriaObjetoPorId().get(id) ?? null) : null;
   }
 
   editar(gasto: Gasto): void {

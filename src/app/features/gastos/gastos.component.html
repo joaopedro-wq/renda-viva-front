@@ -28,7 +28,11 @@
       </bd-field>
 
       <bd-field label="Categoria" hint="Opcional">
-        <select bdInput name="categoria_gasto_id" [(ngModel)]="form.categoria_gasto_id">
+        <select
+          class="select-nativo"
+          name="categoria_gasto_id"
+          [(ngModel)]="form.categoria_gasto_id"
+        >
           <option [ngValue]="null">Sem categoria</option>
           @for (categoria of categorias(); track categoria.id) {
             <option [ngValue]="categoria.id">{{ categoria.nome }}</option>
@@ -55,7 +59,15 @@
 
   <div class="flex flex-col gap-3">
     @if (carregando()) {
-      <bd-card><p class="text-sm text-fg-muted">Carregando...</p></bd-card>
+      @for (linha of [1, 2, 3]; track linha) {
+        <bd-card class="flex items-center gap-4">
+          <bd-skeleton variant="circle" width="40px" height="40px" />
+          <div class="flex flex-1 flex-col gap-2">
+            <bd-skeleton variant="text" width="40%" />
+            <bd-skeleton variant="text" width="65%" />
+          </div>
+        </bd-card>
+      }
     } @else if (gastos().length === 0) {
       <bd-empty-state
         icon="🛒"
@@ -63,16 +75,28 @@
         description="Adicione o primeiro pelo formulário ao lado."
       />
     } @else {
-      @for (gasto of gastos(); track gasto.id) {
-        <bd-card class="flex items-center justify-between gap-4">
-          <div>
-            <p class="font-bold text-fg">{{ gasto.descricao }}</p>
-            <p class="text-sm text-fg-muted">
-              {{ gasto.data }}
-              @if (nomeCategoria(gasto.categoria_gasto_id); as nome) {
-                · {{ nome }}
-              }
-            </p>
+      @for (gasto of gastos(); track gasto.id; let i = $index) {
+        <bd-card
+          interactive
+          bdReveal="up"
+          [revealDelay]="i * 60"
+          class="flex items-center justify-between gap-4"
+        >
+          <div class="flex min-w-0 items-center gap-3">
+            @if (categoriaDe(gasto.categoria_gasto_id); as categoria) {
+              <app-categoria-icon [icone]="categoria.icone" [cor]="categoria.cor" />
+            } @else {
+              <app-categoria-icon />
+            }
+            <div class="min-w-0">
+              <p class="truncate font-bold text-fg">{{ gasto.descricao }}</p>
+              <p class="truncate text-sm text-fg-muted">
+                {{ gasto.data }}
+                @if (nomeCategoria(gasto.categoria_gasto_id); as nome) {
+                  · {{ nome }}
+                }
+              </p>
+            </div>
           </div>
           <div class="flex items-center gap-3">
             <p class="font-bold text-fg whitespace-nowrap">R$ {{ gasto.valor }}</p>
