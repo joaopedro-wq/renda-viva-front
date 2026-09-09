@@ -8,7 +8,14 @@ import {
 } from '@angular/core';
 import { CurrencyPipe, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { LucideChevronLeft, LucideChevronRight, LucidePlus, LucideShoppingCart } from '@lucide/angular';
+import {
+  LucideChevronLeft,
+  LucideChevronRight,
+  LucidePencil,
+  LucidePlus,
+  LucideShoppingCart,
+  LucideTrash2,
+} from '@lucide/angular';
 import { forkJoin } from 'rxjs';
 import {
   BdAlertComponent,
@@ -52,8 +59,10 @@ const FORM_VAZIO: GastoPayload = {
     DatePipe,
     LucideChevronLeft,
     LucideChevronRight,
+    LucidePencil,
     LucidePlus,
     LucideShoppingCart,
+    LucideTrash2,
     BarraVoltarComponent,
     TituloPaginaComponent,
     BdAlertComponent,

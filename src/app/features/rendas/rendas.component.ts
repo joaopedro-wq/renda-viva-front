@@ -1,7 +1,21 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { CurrencyPipe, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { LucideBanknote, LucideChevronLeft, LucideChevronRight, LucidePlus } from '@lucide/angular';
+import {
+  LucideBanknote,
+  LucideChevronLeft,
+  LucideChevronRight,
+  LucidePencil,
+  LucidePlus,
+  LucideTrash2,
+} from '@lucide/angular';
 import { forkJoin } from 'rxjs';
 import {
   BdAlertComponent,
@@ -49,7 +63,9 @@ const FORM_VAZIO: RendaPayload = {
     LucideBanknote,
     LucideChevronLeft,
     LucideChevronRight,
+    LucidePencil,
     LucidePlus,
+    LucideTrash2,
     BarraVoltarComponent,
     TituloPaginaComponent,
     BdAlertComponent,

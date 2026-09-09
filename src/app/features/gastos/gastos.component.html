@@ -46,7 +46,9 @@
 
 <div class="app-card mt-4 p-5 sm:p-6">
   <div class="flex items-baseline justify-between gap-4">
-    <p class="text-xs font-bold uppercase tracking-wide text-fg-subtle">Composição de {{ mesLabel() }}</p>
+    <p class="text-xs font-bold uppercase tracking-wide text-fg-subtle">
+      Composição de {{ mesLabel() }}
+    </p>
     <p class="text-xl font-extrabold text-[var(--bd-danger)] whitespace-nowrap">
       − {{ totalDoMes() | currency: 'BRL' }}
     </p>
@@ -114,6 +116,10 @@
         bdReveal="up"
         [revealDelay]="i * 60"
         class="flex items-center justify-between gap-4"
+        style="
+          background: color-mix(in srgb, var(--bd-danger) 5%, var(--bd-surface));
+          border-color: color-mix(in srgb, var(--bd-danger) 16%, var(--bd-border));
+        "
       >
         <div class="flex min-w-0 items-center gap-3">
           @if (categoriaDe(gasto.categoria_gasto_id); as categoria) {
@@ -131,12 +137,30 @@
             </p>
           </div>
         </div>
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2">
           <p class="font-bold text-[var(--bd-danger)] whitespace-nowrap">
             − {{ gasto.valor | currency: 'BRL' }}
           </p>
-          <button bdButton variant="ghost" size="sm" (click)="editar(gasto)">Editar</button>
-          <button bdButton variant="danger" size="sm" (click)="excluir(gasto)">Excluir</button>
+          <button
+            bdButton
+            variant="ghost"
+            size="sm"
+            iconOnly
+            aria-label="Editar"
+            (click)="editar(gasto)"
+          >
+            <svg lucidePencil size="14"></svg>
+          </button>
+          <button
+            bdButton
+            variant="ghost"
+            size="sm"
+            iconOnly
+            aria-label="Excluir"
+            (click)="excluir(gasto)"
+          >
+            <svg lucideTrash2 size="14"></svg>
+          </button>
         </div>
       </bd-card>
     }
