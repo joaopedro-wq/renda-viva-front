@@ -11,7 +11,7 @@ import { LucideChevronLeft } from '@lucide/angular';
     <div class="mb-5 flex items-center justify-between gap-4">
       <button
         type="button"
-        class="-ml-2 inline-flex items-center gap-1.5 rounded-full py-2 pl-2 pr-3.5 text-sm font-semibold text-fg-muted transition-colors hover:bg-surface-hover hover:text-fg"
+        class="-ml-2 inline-flex cursor-pointer items-center gap-1.5 rounded-full py-2 pl-2 pr-3.5 text-sm font-semibold text-fg-muted transition-colors hover:bg-surface-hover hover:text-fg"
         (click)="voltar()"
       >
         <svg lucideChevronLeft size="16"></svg>

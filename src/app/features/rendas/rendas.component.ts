@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CurrencyPipe, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { LucideBanknote, LucidePlus } from '@lucide/angular';
+import { LucideBanknote, LucideChevronLeft, LucideChevronRight, LucidePlus } from '@lucide/angular';
 import { forkJoin } from 'rxjs';
 import {
   BdAlertComponent,
@@ -26,6 +26,7 @@ import { TituloPaginaComponent } from '../../components/titulo-pagina/titulo-pag
 import { CategoriaIconComponent } from '../../core/catalog/categoria-icon.component';
 import { CategoriaRendaService } from '../../core/catalog/categoria-renda.service';
 import type { CategoriaRenda } from '../../core/catalog/categoria-renda.model';
+import { deslocarMes, mesAtual, rotuloMes } from '../../core/util/mes-referencia';
 import { RendaService } from './data/renda.service';
 import type { Renda, RendaPayload } from './data/renda.model';
 
@@ -38,14 +39,6 @@ const FORM_VAZIO: RendaPayload = {
   recorrente: false,
 };
 
-/** `"2026-09"` do mês corrente — mesmo formato usado em Gastos, pra comparar
- * com o prefixo `YYYY-MM` de `renda.data_recebimento`. */
-function anoMesAtual(): string {
-  const agora = new Date();
-
-  return `${agora.getFullYear()}-${String(agora.getMonth() + 1).padStart(2, '0')}`;
-}
-
 @Component({
   selector: 'app-rendas',
   standalone: true,
@@ -54,6 +47,8 @@ function anoMesAtual(): string {
     CurrencyPipe,
     DatePipe,
     LucideBanknote,
+    LucideChevronLeft,
+    LucideChevronRight,
     LucidePlus,
     BarraVoltarComponent,
     TituloPaginaComponent,
@@ -100,19 +95,20 @@ export class RendasComponent implements OnInit {
     ...this.categorias().map((c) => ({ valor: c.id, rotulo: c.nome, cor: c.cor })),
   ]);
 
-  private readonly rendasDoMes = computed(() => {
-    const anoMes = anoMesAtual();
+  /** `"YYYY-MM"` do mês em exibição — começa no mês corrente, navegável. */
+  protected readonly mesSelecionado = signal(mesAtual());
 
-    return this.rendas().filter((r) => r.data_recebimento.startsWith(anoMes));
+  protected readonly rendasDoMes = computed(() => {
+    const mes = this.mesSelecionado();
+
+    return this.rendas().filter((r) => r.data_recebimento.startsWith(mes));
   });
 
   protected readonly totalDoMes = computed(() =>
     this.rendasDoMes().reduce((soma, r) => soma + Number(r.valor), 0),
   );
 
-  protected readonly mesLabel = computed(() =>
-    new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }),
-  );
+  protected readonly mesLabel = computed(() => rotuloMes(this.mesSelecionado()));
 
   /** Total por categoria no mês corrente, do maior pro menor — a barra de
    * composição do resumo. */
@@ -150,6 +146,14 @@ export class RendasComponent implements OnInit {
         this.erro.set('Não foi possível carregar suas rendas.');
       },
     });
+  }
+
+  protected mesAnterior(): void {
+    this.mesSelecionado.update((atual) => deslocarMes(atual, -1));
+  }
+
+  protected mesSeguinte(): void {
+    this.mesSelecionado.update((atual) => deslocarMes(atual, 1));
   }
 
   nomeCategoria(id: number | null): string | null {

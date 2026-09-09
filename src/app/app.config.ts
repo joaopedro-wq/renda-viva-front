@@ -18,9 +18,6 @@ import { AuthService } from './core/auth/auth.service';
 import { authInterceptor } from './core/http/auth.interceptor';
 import { PALETAS, DEFAULT_PALETTE_ID } from './shell-palette.config';
 
-// Único registro de locale do app — sem isso, os pipes `currency`/`date`
-// caem no en-US (vírgula de milhar, "R$1,234.56") mesmo com todo o resto da
-// UI em português.
 registerLocaleData(localePt);
 
 export const appConfig: ApplicationConfig = {
@@ -39,7 +36,9 @@ export const appConfig: ApplicationConfig = {
     provideAppInitializer(() => {
       const auth = inject(AuthService);
       const result = auth.restoreSession();
-      return new Promise<void>((resolve) => result.subscribe({ next: () => resolve(), error: () => resolve() }));
+      return new Promise<void>((resolve) =>
+        result.subscribe({ next: () => resolve(), error: () => resolve() }),
+      );
     }),
   ],
 };

@@ -17,10 +17,6 @@ export interface OpcaoSelectInline {
   cor?: string;
 }
 
-/** `pill` — etiqueta compacta (o gatilho encolhe pro conteúdo), usada lado a
- * lado com outras etiquetas na revisão de importação. `campo` — ocupa a
- * largura toda e imita a caixa do `bd-input` (mesma borda, altura, raio),
- * pra não ficar pequeno demais ao lado dos outros campos de um formulário. */
 export type VarianteSelectInline = 'pill' | 'campo';
 
 @Component({
@@ -110,7 +106,6 @@ export class SelectInlineComponent {
   readonly opcoes = input.required<OpcaoSelectInline[]>();
   readonly valor = input<string | number | null>(null);
   readonly variante = input<VarianteSelectInline>('pill');
-  /** Só valem pra variante `pill` — a `campo` sempre usa a caixa neutra do input. */
   readonly corFundo = input<string | null>(null);
   readonly corTexto = input<string | null>(null);
 

@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import { CurrencyPipe, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { LucidePlus, LucideShoppingCart } from '@lucide/angular';
+import { LucideChevronLeft, LucideChevronRight, LucidePlus, LucideShoppingCart } from '@lucide/angular';
 import { forkJoin } from 'rxjs';
 import {
   BdAlertComponent,
@@ -31,6 +31,7 @@ import { TituloPaginaComponent } from '../../components/titulo-pagina/titulo-pag
 import { CategoriaIconComponent } from '../../core/catalog/categoria-icon.component';
 import { CategoriaGastoService } from '../../core/catalog/categoria-gasto.service';
 import type { CategoriaGasto } from '../../core/catalog/categoria-gasto.model';
+import { deslocarMes, mesAtual, rotuloMes } from '../../core/util/mes-referencia';
 import { GastoService } from './data/gasto.service';
 import type { Gasto, GastoPayload } from './data/gasto.model';
 
@@ -42,14 +43,6 @@ const FORM_VAZIO: GastoPayload = {
   obrigacao_fixa_id: null,
 };
 
-/** `"2026-09"` do mês corrente — usado tanto pra filtrar a composição quanto
- * pra comparar com o prefixo `YYYY-MM` de `gasto.data`. */
-function anoMesAtual(): string {
-  const agora = new Date();
-
-  return `${agora.getFullYear()}-${String(agora.getMonth() + 1).padStart(2, '0')}`;
-}
-
 @Component({
   selector: 'app-gastos',
   standalone: true,
@@ -57,6 +50,8 @@ function anoMesAtual(): string {
     FormsModule,
     CurrencyPipe,
     DatePipe,
+    LucideChevronLeft,
+    LucideChevronRight,
     LucidePlus,
     LucideShoppingCart,
     BarraVoltarComponent,
@@ -101,19 +96,20 @@ export class GastosComponent implements OnInit {
     ...this.categorias().map((c) => ({ valor: c.id, rotulo: c.nome, cor: c.cor })),
   ]);
 
-  private readonly gastosDoMes = computed(() => {
-    const anoMes = anoMesAtual();
+  /** `"YYYY-MM"` do mês em exibição — começa no mês corrente, navegável. */
+  protected readonly mesSelecionado = signal(mesAtual());
 
-    return this.gastos().filter((g) => g.data.startsWith(anoMes));
+  protected readonly gastosDoMes = computed(() => {
+    const mes = this.mesSelecionado();
+
+    return this.gastos().filter((g) => g.data.startsWith(mes));
   });
 
   protected readonly totalDoMes = computed(() =>
     this.gastosDoMes().reduce((soma, g) => soma + Number(g.valor), 0),
   );
 
-  protected readonly mesLabel = computed(() =>
-    new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }),
-  );
+  protected readonly mesLabel = computed(() => rotuloMes(this.mesSelecionado()));
 
   /** Total por categoria no mês corrente, do maior pro menor — a barra de
    * composição do resumo. */
@@ -151,6 +147,14 @@ export class GastosComponent implements OnInit {
         this.erro.set('Não foi possível carregar seus gastos.');
       },
     });
+  }
+
+  protected mesAnterior(): void {
+    this.mesSelecionado.update((atual) => deslocarMes(atual, -1));
+  }
+
+  protected mesSeguinte(): void {
+    this.mesSelecionado.update((atual) => deslocarMes(atual, 1));
   }
 
   nomeCategoria(id: number | null): string | null {

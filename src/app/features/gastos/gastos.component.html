@@ -1,6 +1,13 @@
 <app-barra-voltar>
-  <button bdButton type="button" appBarraVoltarAcao (click)="novoGasto()">
-    <svg lucidePlus size="16"></svg>
+  <button
+    bdButton
+    size="sm"
+    type="button"
+    appBarraVoltarAcao
+    style="padding: 8px 14px"
+    (click)="novoGasto()"
+  >
+    <svg lucidePlus size="14"></svg>
     Novo gasto
   </button>
 </app-barra-voltar>
@@ -15,7 +22,29 @@
   </div>
 }
 
-<div class="app-card mt-6 p-5 sm:p-6">
+<div class="mt-6 flex items-center justify-center gap-1">
+  <button
+    type="button"
+    class="grid h-8 w-8 cursor-pointer place-items-center rounded-full text-fg-muted transition-colors hover:bg-surface-hover hover:text-fg"
+    aria-label="Mês anterior"
+    (click)="mesAnterior()"
+  >
+    <svg lucideChevronLeft size="16"></svg>
+  </button>
+  <p class="min-w-40 text-center text-sm font-bold text-fg first-letter:uppercase">
+    {{ mesLabel() }}
+  </p>
+  <button
+    type="button"
+    class="grid h-8 w-8 cursor-pointer place-items-center rounded-full text-fg-muted transition-colors hover:bg-surface-hover hover:text-fg"
+    aria-label="Próximo mês"
+    (click)="mesSeguinte()"
+  >
+    <svg lucideChevronRight size="16"></svg>
+  </button>
+</div>
+
+<div class="app-card mt-4 p-5 sm:p-6">
   <div class="flex items-baseline justify-between gap-4">
     <p class="text-xs font-bold uppercase tracking-wide text-fg-subtle">Composição de {{ mesLabel() }}</p>
     <p class="text-xl font-extrabold text-[var(--bd-danger)] whitespace-nowrap">
@@ -46,7 +75,16 @@
   }
 </div>
 
-<div class="mt-6 flex flex-col gap-3">
+<div class="mt-6 flex items-center justify-between">
+  <p class="text-sm font-bold text-fg">Lançamentos</p>
+  @if (!carregando() && gastosDoMes().length > 0) {
+    <p class="text-xs text-fg-muted">
+      {{ gastosDoMes().length }} {{ gastosDoMes().length === 1 ? 'lançamento' : 'lançamentos' }}
+    </p>
+  }
+</div>
+
+<div class="mt-3 flex flex-col gap-3">
   @if (carregando()) {
     @for (linha of [1, 2, 3]; track linha) {
       <bd-card class="flex items-center gap-4">
@@ -63,8 +101,14 @@
       title="Nenhum gasto lançado ainda"
       description="Adicione o primeiro pelo botão Novo gasto, acima."
     />
+  } @else if (gastosDoMes().length === 0) {
+    <bd-empty-state
+      icon="🛒"
+      [title]="'Nenhum gasto em ' + mesLabel()"
+      description="Troque o mês, acima, pra ver outros lançamentos."
+    />
   } @else {
-    @for (gasto of gastos(); track gasto.id; let i = $index) {
+    @for (gasto of gastosDoMes(); track gasto.id; let i = $index) {
       <bd-card
         interactive
         bdReveal="up"
