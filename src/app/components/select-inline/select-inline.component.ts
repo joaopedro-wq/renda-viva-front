@@ -17,35 +17,69 @@ export interface OpcaoSelectInline {
   cor?: string;
 }
 
+/** `pill` — etiqueta compacta (o gatilho encolhe pro conteúdo), usada lado a
+ * lado com outras etiquetas na revisão de importação. `campo` — ocupa a
+ * largura toda e imita a caixa do `bd-input` (mesma borda, altura, raio),
+ * pra não ficar pequeno demais ao lado dos outros campos de um formulário. */
+export type VarianteSelectInline = 'pill' | 'campo';
+
 @Component({
   selector: 'app-select-inline',
   standalone: true,
   imports: [LucideCheck, LucideChevronDown],
   template: `
-    <button
-      #gatilho
-      type="button"
-      class="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors"
-      [style.background]="corFundo() ?? 'var(--bd-surface-hover)'"
-      [style.color]="corTexto() ?? 'var(--bd-fg-muted)'"
-      [attr.aria-expanded]="aberto()"
-      (click)="alternar(gatilho)"
-    >
-      <span class="max-w-[9rem] truncate">{{ rotuloAtual() }}</span>
-      <svg
-        lucideChevronDown
-        size="13"
-        class="shrink-0 transition-transform"
-        [class.rotate-180]="aberto()"
-      ></svg>
-    </button>
+    @if (variante() === 'campo') {
+      <button
+        #gatilho
+        type="button"
+        class="flex w-full items-center justify-between gap-2 rounded-[0.5rem] border border-border bg-bg px-4 py-3 text-base text-fg transition-colors hover:border-border-strong"
+        [attr.aria-expanded]="aberto()"
+        (click)="alternar(gatilho)"
+      >
+        <span class="flex min-w-0 items-center gap-2">
+          @if (corAtual(); as cor) {
+            <span class="h-2 w-2 shrink-0 rounded-full" [style.background]="cor"></span>
+          }
+          <span class="truncate" [class.text-fg-subtle]="valor() === null">{{
+            rotuloAtual() || 'Selecione'
+          }}</span>
+        </span>
+        <svg
+          lucideChevronDown
+          size="16"
+          class="shrink-0 text-fg-subtle transition-transform"
+          [class.rotate-180]="aberto()"
+        ></svg>
+      </button>
+    } @else {
+      <button
+        #gatilho
+        type="button"
+        class="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors"
+        [style.background]="corFundo() ?? 'var(--bd-surface-hover)'"
+        [style.color]="corTexto() ?? 'var(--bd-fg-muted)'"
+        [attr.aria-expanded]="aberto()"
+        (click)="alternar(gatilho)"
+      >
+        <span class="max-w-[9rem] truncate">{{ rotuloAtual() }}</span>
+        <svg
+          lucideChevronDown
+          size="13"
+          class="shrink-0 transition-transform"
+          [class.rotate-180]="aberto()"
+        ></svg>
+      </button>
+    }
 
     @if (aberto()) {
       <div
-        class="z-[100] max-h-64 min-w-[10rem] overflow-y-auto rounded-2xl border border-border bg-surface p-1.5 shadow-md"
-        style="position: fixed; transform: translateX(-100%);"
+        class="z-[100] max-h-64 overflow-y-auto rounded-2xl border border-border bg-surface p-1.5 shadow-md"
+        [class.min-w-40]="variante() === 'pill'"
+        [style.position]="'fixed'"
+        [style.transform]="variante() === 'campo' ? 'none' : 'translateX(-100%)'"
         [style.top.px]="posicao().top"
         [style.left.px]="posicao().left"
+        [style.width.px]="variante() === 'campo' ? posicao().width : null"
       >
         @for (opcao of opcoes(); track opcao.valor) {
           <button
@@ -75,16 +109,22 @@ export class SelectInlineComponent {
 
   readonly opcoes = input.required<OpcaoSelectInline[]>();
   readonly valor = input<string | number | null>(null);
+  readonly variante = input<VarianteSelectInline>('pill');
+  /** Só valem pra variante `pill` — a `campo` sempre usa a caixa neutra do input. */
   readonly corFundo = input<string | null>(null);
   readonly corTexto = input<string | null>(null);
 
   readonly valorChange = output<string | number | null>();
 
   protected readonly aberto = signal(false);
-  protected readonly posicao = signal({ top: 0, left: 0 });
+  protected readonly posicao = signal({ top: 0, left: 0, width: 0 });
 
   protected readonly rotuloAtual = computed(
     () => this.opcoes().find((o) => o.valor === this.valor())?.rotulo ?? '',
+  );
+
+  protected readonly corAtual = computed(
+    () => this.opcoes().find((o) => o.valor === this.valor())?.cor ?? null,
   );
 
   protected alternar(botao: HTMLButtonElement): void {
@@ -95,7 +135,11 @@ export class SelectInlineComponent {
     }
 
     const rect = botao.getBoundingClientRect();
-    this.posicao.set({ top: rect.bottom + 6, left: rect.right });
+    this.posicao.set({
+      top: rect.bottom + 6,
+      left: this.variante() === 'campo' ? rect.left : rect.right,
+      width: rect.width,
+    });
     this.aberto.set(true);
   }
 

@@ -1,6 +1,7 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { CurrencyPipe, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { LucideBanknote } from '@lucide/angular';
+import { LucideBanknote, LucidePlus } from '@lucide/angular';
 import { forkJoin } from 'rxjs';
 import {
   BdAlertComponent,
@@ -11,11 +12,16 @@ import {
   BdEmptyStateComponent,
   BdFieldComponent,
   BdInputComponent,
+  BdModalComponent,
   BdRevealDirective,
   BdSkeletonComponent,
 } from 'bandeira-ui';
 
 import { BarraVoltarComponent } from '../../components/barra-voltar/barra-voltar.component';
+import {
+  SelectInlineComponent,
+  type OpcaoSelectInline,
+} from '../../components/select-inline/select-inline.component';
 import { TituloPaginaComponent } from '../../components/titulo-pagina/titulo-pagina.component';
 import { CategoriaIconComponent } from '../../core/catalog/categoria-icon.component';
 import { CategoriaRendaService } from '../../core/catalog/categoria-renda.service';
@@ -32,12 +38,23 @@ const FORM_VAZIO: RendaPayload = {
   recorrente: false,
 };
 
+/** `"2026-09"` do mês corrente — mesmo formato usado em Gastos, pra comparar
+ * com o prefixo `YYYY-MM` de `renda.data_recebimento`. */
+function anoMesAtual(): string {
+  const agora = new Date();
+
+  return `${agora.getFullYear()}-${String(agora.getMonth() + 1).padStart(2, '0')}`;
+}
+
 @Component({
   selector: 'app-rendas',
   standalone: true,
   imports: [
     FormsModule,
+    CurrencyPipe,
+    DatePipe,
     LucideBanknote,
+    LucidePlus,
     BarraVoltarComponent,
     TituloPaginaComponent,
     BdAlertComponent,
@@ -48,9 +65,11 @@ const FORM_VAZIO: RendaPayload = {
     BdEmptyStateComponent,
     BdFieldComponent,
     BdInputComponent,
+    BdModalComponent,
     BdRevealDirective,
     BdSkeletonComponent,
     CategoriaIconComponent,
+    SelectInlineComponent,
   ],
   templateUrl: './rendas.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -67,7 +86,61 @@ export class RendasComponent implements OnInit {
 
   /** `null` = criando; id != null = editando essa renda. */
   protected readonly editandoId = signal<number | null>(null);
+  protected readonly formularioAberto = signal(false);
   protected form: RendaPayload = { ...FORM_VAZIO };
+
+  private readonly categoriaObjetoPorId = computed(
+    () => new Map(this.categorias().map((c) => [c.id, c])),
+  );
+
+  /** Mesmo padrão colorido do `app-select-inline` já usado na revisão de
+   * importação — padronizado aqui pra Gastos e Rendas terem a mesma cara. */
+  protected readonly opcoesCategoria = computed<OpcaoSelectInline[]>(() => [
+    { valor: null, rotulo: 'Sem categoria' },
+    ...this.categorias().map((c) => ({ valor: c.id, rotulo: c.nome, cor: c.cor })),
+  ]);
+
+  private readonly rendasDoMes = computed(() => {
+    const anoMes = anoMesAtual();
+
+    return this.rendas().filter((r) => r.data_recebimento.startsWith(anoMes));
+  });
+
+  protected readonly totalDoMes = computed(() =>
+    this.rendasDoMes().reduce((soma, r) => soma + Number(r.valor), 0),
+  );
+
+  protected readonly mesLabel = computed(() =>
+    new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }),
+  );
+
+  /** Total por categoria no mês corrente, do maior pro menor — a barra de
+   * composição do resumo. */
+  protected readonly composicaoDoMes = computed(() => {
+    const porCategoria = new Map<number | null, number>();
+
+    for (const renda of this.rendasDoMes()) {
+      porCategoria.set(
+        renda.categoria_renda_id,
+        (porCategoria.get(renda.categoria_renda_id) ?? 0) + Number(renda.valor),
+      );
+    }
+
+    const total = this.totalDoMes();
+
+    return [...porCategoria.entries()]
+      .map(([id, valorTotal]) => {
+        const categoria = id !== null ? this.categoriaObjetoPorId().get(id) : null;
+
+        return {
+          nome: categoria?.nome ?? 'Sem categoria',
+          cor: categoria?.cor ?? '#8a8a8a',
+          total: valorTotal,
+          percentual: total > 0 ? Math.round((valorTotal / total) * 100) : 0,
+        };
+      })
+      .sort((a, b) => b.total - a.total);
+  });
 
   ngOnInit(): void {
     forkJoin([this.rendaService.listar(), this.categoriaRendaService.listar()]).subscribe({
@@ -87,6 +160,12 @@ export class RendasComponent implements OnInit {
     return this.categorias().find((c) => c.id === id) ?? null;
   }
 
+  protected novaRenda(): void {
+    this.editandoId.set(null);
+    this.form = { ...FORM_VAZIO };
+    this.formularioAberto.set(true);
+  }
+
   editar(renda: Renda): void {
     this.editandoId.set(renda.id);
     this.form = {
@@ -97,6 +176,12 @@ export class RendasComponent implements OnInit {
       data_recebimento: renda.data_recebimento,
       recorrente: renda.recorrente,
     };
+    this.formularioAberto.set(true);
+  }
+
+  protected onFormularioOpenChange(aberto: boolean): void {
+    this.formularioAberto.set(aberto);
+    if (!aberto) this.cancelarEdicao();
   }
 
   cancelarEdicao(): void {
@@ -118,6 +203,7 @@ export class RendasComponent implements OnInit {
     requisicao.subscribe({
       next: () => {
         this.salvando.set(false);
+        this.formularioAberto.set(false);
         this.cancelarEdicao();
       },
       error: () => {

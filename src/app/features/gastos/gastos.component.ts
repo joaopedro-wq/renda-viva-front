@@ -6,8 +6,9 @@ import {
   inject,
   signal,
 } from '@angular/core';
+import { CurrencyPipe, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { LucideShoppingCart } from '@lucide/angular';
+import { LucidePlus, LucideShoppingCart } from '@lucide/angular';
 import { forkJoin } from 'rxjs';
 import {
   BdAlertComponent,
@@ -16,11 +17,16 @@ import {
   BdEmptyStateComponent,
   BdFieldComponent,
   BdInputComponent,
+  BdModalComponent,
   BdRevealDirective,
   BdSkeletonComponent,
 } from 'bandeira-ui';
 
 import { BarraVoltarComponent } from '../../components/barra-voltar/barra-voltar.component';
+import {
+  SelectInlineComponent,
+  type OpcaoSelectInline,
+} from '../../components/select-inline/select-inline.component';
 import { TituloPaginaComponent } from '../../components/titulo-pagina/titulo-pagina.component';
 import { CategoriaIconComponent } from '../../core/catalog/categoria-icon.component';
 import { CategoriaGastoService } from '../../core/catalog/categoria-gasto.service';
@@ -36,11 +42,22 @@ const FORM_VAZIO: GastoPayload = {
   obrigacao_fixa_id: null,
 };
 
+/** `"2026-09"` do mês corrente — usado tanto pra filtrar a composição quanto
+ * pra comparar com o prefixo `YYYY-MM` de `gasto.data`. */
+function anoMesAtual(): string {
+  const agora = new Date();
+
+  return `${agora.getFullYear()}-${String(agora.getMonth() + 1).padStart(2, '0')}`;
+}
+
 @Component({
   selector: 'app-gastos',
   standalone: true,
   imports: [
     FormsModule,
+    CurrencyPipe,
+    DatePipe,
+    LucidePlus,
     LucideShoppingCart,
     BarraVoltarComponent,
     TituloPaginaComponent,
@@ -50,9 +67,11 @@ const FORM_VAZIO: GastoPayload = {
     BdEmptyStateComponent,
     BdFieldComponent,
     BdInputComponent,
+    BdModalComponent,
     BdRevealDirective,
     BdSkeletonComponent,
     CategoriaIconComponent,
+    SelectInlineComponent,
   ],
   templateUrl: './gastos.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -68,15 +87,61 @@ export class GastosComponent implements OnInit {
   protected readonly erro = signal<string | null>(null);
 
   protected readonly editandoId = signal<number | null>(null);
+  protected readonly formularioAberto = signal(false);
   protected form: GastoPayload = { ...FORM_VAZIO };
-
-  private readonly categoriasPorId = computed(
-    () => new Map(this.categorias().map((c) => [c.id, c.nome])),
-  );
 
   private readonly categoriaObjetoPorId = computed(
     () => new Map(this.categorias().map((c) => [c.id, c])),
   );
+
+  /** Mesmo padrão colorido do `app-select-inline` já usado na revisão de
+   * importação — padronizado aqui pra Gastos e Rendas terem a mesma cara. */
+  protected readonly opcoesCategoria = computed<OpcaoSelectInline[]>(() => [
+    { valor: null, rotulo: 'Sem categoria' },
+    ...this.categorias().map((c) => ({ valor: c.id, rotulo: c.nome, cor: c.cor })),
+  ]);
+
+  private readonly gastosDoMes = computed(() => {
+    const anoMes = anoMesAtual();
+
+    return this.gastos().filter((g) => g.data.startsWith(anoMes));
+  });
+
+  protected readonly totalDoMes = computed(() =>
+    this.gastosDoMes().reduce((soma, g) => soma + Number(g.valor), 0),
+  );
+
+  protected readonly mesLabel = computed(() =>
+    new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }),
+  );
+
+  /** Total por categoria no mês corrente, do maior pro menor — a barra de
+   * composição do resumo. */
+  protected readonly composicaoDoMes = computed(() => {
+    const porCategoria = new Map<number | null, number>();
+
+    for (const gasto of this.gastosDoMes()) {
+      porCategoria.set(
+        gasto.categoria_gasto_id,
+        (porCategoria.get(gasto.categoria_gasto_id) ?? 0) + Number(gasto.valor),
+      );
+    }
+
+    const total = this.totalDoMes();
+
+    return [...porCategoria.entries()]
+      .map(([id, valorTotal]) => {
+        const categoria = id !== null ? this.categoriaObjetoPorId().get(id) : null;
+
+        return {
+          nome: categoria?.nome ?? 'Sem categoria',
+          cor: categoria?.cor ?? '#8a8a8a',
+          total: valorTotal,
+          percentual: total > 0 ? Math.round((valorTotal / total) * 100) : 0,
+        };
+      })
+      .sort((a, b) => b.total - a.total);
+  });
 
   ngOnInit(): void {
     forkJoin([this.gastoService.listar(), this.categoriaGastoService.listar()]).subscribe({
@@ -89,11 +154,17 @@ export class GastosComponent implements OnInit {
   }
 
   nomeCategoria(id: number | null): string | null {
-    return id ? (this.categoriasPorId().get(id) ?? null) : null;
+    return id ? (this.categoriaObjetoPorId().get(id)?.nome ?? null) : null;
   }
 
   categoriaDe(id: number | null): CategoriaGasto | null {
     return id ? (this.categoriaObjetoPorId().get(id) ?? null) : null;
+  }
+
+  protected novoGasto(): void {
+    this.editandoId.set(null);
+    this.form = { ...FORM_VAZIO };
+    this.formularioAberto.set(true);
   }
 
   editar(gasto: Gasto): void {
@@ -105,6 +176,12 @@ export class GastosComponent implements OnInit {
       categoria_gasto_id: gasto.categoria_gasto_id,
       obrigacao_fixa_id: gasto.obrigacao_fixa_id,
     };
+    this.formularioAberto.set(true);
+  }
+
+  protected onFormularioOpenChange(aberto: boolean): void {
+    this.formularioAberto.set(aberto);
+    if (!aberto) this.cancelarEdicao();
   }
 
   cancelarEdicao(): void {
@@ -126,6 +203,7 @@ export class GastosComponent implements OnInit {
     requisicao.subscribe({
       next: () => {
         this.salvando.set(false);
+        this.formularioAberto.set(false);
         this.cancelarEdicao();
       },
       error: () => {

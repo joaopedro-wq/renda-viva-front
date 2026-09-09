@@ -1,114 +1,146 @@
-<app-barra-voltar />
+<app-barra-voltar>
+  <button bdButton type="button" appBarraVoltarAcao (click)="novoGasto()">
+    <svg lucidePlus size="16"></svg>
+    Novo gasto
+  </button>
+</app-barra-voltar>
 
 <app-titulo-pagina titulo="Gastos" subtitulo="Seus lançamentos de gasto — categoria é opcional.">
   <svg appTituloPaginaIcone lucideShoppingCart size="22"></svg>
 </app-titulo-pagina>
 
-<div class="grid gap-6 lg:grid-cols-[360px_1fr] mt-6">
-  <bd-card>
-    <form class="flex flex-col gap-4" (ngSubmit)="salvar()">
-      <h2 class="text-lg font-bold text-fg">
-        {{ editandoId() ? 'Editar gasto' : 'Novo gasto' }}
-      </h2>
-
-      <bd-field label="Descrição">
-        <input bdInput type="text" name="descricao" [(ngModel)]="form.descricao" required />
-      </bd-field>
-
-      <bd-field label="Valor">
-        <input
-          bdInput
-          type="number"
-          name="valor"
-          [(ngModel)]="form.valor"
-          required
-          min="0.01"
-          step="0.01"
-        />
-      </bd-field>
-
-      <bd-field label="Data">
-        <input bdInput type="date" name="data" [(ngModel)]="form.data" required />
-      </bd-field>
-
-      <bd-field label="Categoria" hint="Opcional">
-        <select
-          class="select-nativo"
-          name="categoria_gasto_id"
-          [(ngModel)]="form.categoria_gasto_id"
-        >
-          <option [ngValue]="null">Sem categoria</option>
-          @for (categoria of categorias(); track categoria.id) {
-            <option [ngValue]="categoria.id">{{ categoria.nome }}</option>
-          }
-        </select>
-      </bd-field>
-
-      @if (erro()) {
-        <bd-alert tone="danger">{{ erro() }}</bd-alert>
-      }
-
-      <div class="flex gap-2">
-        <button bdButton type="submit" [loading]="salvando()" class="flex-1">
-          {{ editandoId() ? 'Salvar alterações' : 'Adicionar gasto' }}
-        </button>
-        @if (editandoId()) {
-          <button bdButton type="button" variant="ghost" (click)="cancelarEdicao()">
-            Cancelar
-          </button>
-        }
-      </div>
-    </form>
-  </bd-card>
-
-  <div class="flex flex-col gap-3">
-    @if (carregando()) {
-      @for (linha of [1, 2, 3]; track linha) {
-        <bd-card class="flex items-center gap-4">
-          <bd-skeleton variant="circle" width="40px" height="40px" />
-          <div class="flex flex-1 flex-col gap-2">
-            <bd-skeleton variant="text" width="40%" />
-            <bd-skeleton variant="text" width="65%" />
-          </div>
-        </bd-card>
-      }
-    } @else if (gastos().length === 0) {
-      <bd-empty-state
-        icon="🛒"
-        title="Nenhum gasto lançado ainda"
-        description="Adicione o primeiro pelo formulário ao lado."
-      />
-    } @else {
-      @for (gasto of gastos(); track gasto.id; let i = $index) {
-        <bd-card
-          interactive
-          bdReveal="up"
-          [revealDelay]="i * 60"
-          class="flex items-center justify-between gap-4"
-        >
-          <div class="flex min-w-0 items-center gap-3">
-            @if (categoriaDe(gasto.categoria_gasto_id); as categoria) {
-              <app-categoria-icon [icone]="categoria.icone" [cor]="categoria.cor" />
-            } @else {
-              <app-categoria-icon />
-            }
-            <div class="min-w-0">
-              <p class="truncate font-bold text-fg">{{ gasto.descricao }}</p>
-              <p class="truncate text-sm text-fg-muted">
-                {{ gasto.data }}
-                @if (nomeCategoria(gasto.categoria_gasto_id); as nome) {
-                  · {{ nome }}
-                }
-              </p>
-            </div>
-          </div>
-          <div class="flex items-center gap-3">
-            <p class="font-bold text-fg whitespace-nowrap">R$ {{ gasto.valor }}</p>
-            <button bdButton variant="ghost" size="sm" (click)="editar(gasto)">Editar</button>
-            <button bdButton variant="danger" size="sm" (click)="excluir(gasto)">Excluir</button>
-          </div>
-        </bd-card>
-      }
-    }
+@if (erro()) {
+  <div class="mt-6">
+    <bd-alert tone="danger">{{ erro() }}</bd-alert>
   </div>
+}
+
+<div class="app-card mt-6 p-5 sm:p-6">
+  <div class="flex items-baseline justify-between gap-4">
+    <p class="text-xs font-bold uppercase tracking-wide text-fg-subtle">Composição de {{ mesLabel() }}</p>
+    <p class="text-xl font-extrabold text-[var(--bd-danger)] whitespace-nowrap">
+      − {{ totalDoMes() | currency: 'BRL' }}
+    </p>
+  </div>
+
+  @if (composicaoDoMes().length === 0) {
+    <p class="mt-3 text-sm text-fg-muted">Nenhum gasto lançado este mês ainda.</p>
+  } @else {
+    <div class="mt-4 flex flex-col gap-2.5">
+      @for (item of composicaoDoMes(); track item.nome) {
+        <div class="flex items-center gap-3">
+          <span class="w-24 shrink-0 truncate text-xs text-fg-muted">{{ item.nome }}</span>
+          <div class="h-2 flex-1 overflow-hidden rounded-full bg-surface-hover">
+            <span
+              class="block h-full rounded-full"
+              [style.width.%]="item.percentual"
+              [style.background-color]="item.cor"
+            ></span>
+          </div>
+          <span class="w-20 shrink-0 text-right text-xs font-bold text-fg">
+            {{ item.total | currency: 'BRL' }}
+          </span>
+        </div>
+      }
+    </div>
+  }
 </div>
+
+<div class="mt-6 flex flex-col gap-3">
+  @if (carregando()) {
+    @for (linha of [1, 2, 3]; track linha) {
+      <bd-card class="flex items-center gap-4">
+        <bd-skeleton variant="circle" width="40px" height="40px" />
+        <div class="flex flex-1 flex-col gap-2">
+          <bd-skeleton variant="text" width="40%" />
+          <bd-skeleton variant="text" width="65%" />
+        </div>
+      </bd-card>
+    }
+  } @else if (gastos().length === 0) {
+    <bd-empty-state
+      icon="🛒"
+      title="Nenhum gasto lançado ainda"
+      description="Adicione o primeiro pelo botão Novo gasto, acima."
+    />
+  } @else {
+    @for (gasto of gastos(); track gasto.id; let i = $index) {
+      <bd-card
+        interactive
+        bdReveal="up"
+        [revealDelay]="i * 60"
+        class="flex items-center justify-between gap-4"
+      >
+        <div class="flex min-w-0 items-center gap-3">
+          @if (categoriaDe(gasto.categoria_gasto_id); as categoria) {
+            <app-categoria-icon [icone]="categoria.icone" [cor]="categoria.cor" />
+          } @else {
+            <app-categoria-icon />
+          }
+          <div class="min-w-0">
+            <p class="truncate font-bold text-fg">{{ gasto.descricao }}</p>
+            <p class="truncate text-sm text-fg-muted">
+              {{ gasto.data | date: 'dd/MM' }}
+              @if (nomeCategoria(gasto.categoria_gasto_id); as nome) {
+                · {{ nome }}
+              }
+            </p>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <p class="font-bold text-[var(--bd-danger)] whitespace-nowrap">
+            − {{ gasto.valor | currency: 'BRL' }}
+          </p>
+          <button bdButton variant="ghost" size="sm" (click)="editar(gasto)">Editar</button>
+          <button bdButton variant="danger" size="sm" (click)="excluir(gasto)">Excluir</button>
+        </div>
+      </bd-card>
+    }
+  }
+</div>
+
+<bd-modal
+  [open]="formularioAberto()"
+  (openChange)="onFormularioOpenChange($event)"
+  [title]="editandoId() ? 'Editar gasto' : 'Novo gasto'"
+>
+  <form class="flex flex-col gap-4" (ngSubmit)="salvar()">
+    <bd-field label="Descrição">
+      <input bdInput type="text" name="descricao" [(ngModel)]="form.descricao" required />
+    </bd-field>
+
+    <bd-field label="Valor">
+      <input
+        bdInput
+        type="number"
+        name="valor"
+        [(ngModel)]="form.valor"
+        required
+        min="0.01"
+        step="0.01"
+      />
+    </bd-field>
+
+    <bd-field label="Data">
+      <input bdInput type="date" name="data" [(ngModel)]="form.data" required />
+    </bd-field>
+
+    <bd-field label="Categoria" hint="Opcional">
+      <app-select-inline
+        variante="campo"
+        [opcoes]="opcoesCategoria()"
+        [valor]="form.categoria_gasto_id"
+        (valorChange)="form.categoria_gasto_id = $any($event)"
+      />
+    </bd-field>
+
+    <div class="flex gap-2">
+      <button bdButton type="submit" [loading]="salvando()" class="flex-1">
+        {{ editandoId() ? 'Salvar alterações' : 'Adicionar gasto' }}
+      </button>
+      <button bdButton type="button" variant="ghost" (click)="onFormularioOpenChange(false)">
+        Cancelar
+      </button>
+    </div>
+  </form>
+</bd-modal>

@@ -55,7 +55,10 @@ import type {
   ResultadoConfirmacao,
   TipoLancamento,
 } from '../data/importacao.model';
-import { SelectInlineComponent, type OpcaoSelectInline } from './select-inline.component';
+import {
+  SelectInlineComponent,
+  type OpcaoSelectInline,
+} from '../../../components/select-inline/select-inline.component';
 
 type Etapa = 'mapeando' | 'revisando' | 'concluido';
 
