@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { LucideBanknote } from '@lucide/angular';
 import { forkJoin } from 'rxjs';
 import {
   BdAlertComponent,
@@ -10,11 +11,12 @@ import {
   BdEmptyStateComponent,
   BdFieldComponent,
   BdInputComponent,
-  BdPageHeaderComponent,
   BdRevealDirective,
   BdSkeletonComponent,
 } from 'bandeira-ui';
 
+import { BarraVoltarComponent } from '../../components/barra-voltar/barra-voltar.component';
+import { TituloPaginaComponent } from '../../components/titulo-pagina/titulo-pagina.component';
 import { CategoriaIconComponent } from '../../core/catalog/categoria-icon.component';
 import { CategoriaRendaService } from '../../core/catalog/categoria-renda.service';
 import type { CategoriaRenda } from '../../core/catalog/categoria-renda.model';
@@ -35,6 +37,9 @@ const FORM_VAZIO: RendaPayload = {
   standalone: true,
   imports: [
     FormsModule,
+    LucideBanknote,
+    BarraVoltarComponent,
+    TituloPaginaComponent,
     BdAlertComponent,
     BdButtonComponent,
     BdCardComponent,
@@ -43,7 +48,6 @@ const FORM_VAZIO: RendaPayload = {
     BdEmptyStateComponent,
     BdFieldComponent,
     BdInputComponent,
-    BdPageHeaderComponent,
     BdRevealDirective,
     BdSkeletonComponent,
     CategoriaIconComponent,

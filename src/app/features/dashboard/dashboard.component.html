@@ -1,4 +1,11 @@
 <div class="mx-auto flex max-w-4xl flex-col gap-6">
+  <app-titulo-pagina
+    titulo="Painel"
+    subtitulo="Quanto você pode gastar essa semana, com base no que já entrou."
+  >
+    <svg appTituloPaginaIcone lucideHouse size="22"></svg>
+  </app-titulo-pagina>
+
   @if (erro()) {
     <bd-alert tone="danger">{{ erro() }}</bd-alert>
   }

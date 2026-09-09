@@ -6,6 +6,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
+import { LucideHouse } from '@lucide/angular';
 import {
   BdAlertComponent,
   BdCardComponent,
@@ -16,6 +17,7 @@ import {
   BdSkeletonComponent,
 } from 'bandeira-ui';
 
+import { TituloPaginaComponent } from '../../components/titulo-pagina/titulo-pagina.component';
 import { HistoriaDoMesService } from './data/historia-do-mes.service';
 import { PainelService } from './data/painel.service';
 import type { DadoDaSemana } from './data/dado-da-semana.model';
@@ -25,6 +27,8 @@ import type { HistoriaDoMes } from './data/historia-do-mes.model';
   selector: 'app-dashboard',
   standalone: true,
   imports: [
+    LucideHouse,
+    TituloPaginaComponent,
     BdAlertComponent,
     BdCardComponent,
     BdCountUpDirective,

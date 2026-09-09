@@ -7,8 +7,10 @@ import {
   signal,
 } from '@angular/core';
 import { Subject, forkJoin, takeUntil } from 'rxjs';
-import { BdPageHeaderComponent } from 'bandeira-ui';
+import { LucideUploadCloud } from '@lucide/angular';
 
+import { BarraVoltarComponent } from '../../components/barra-voltar/barra-voltar.component';
+import { TituloPaginaComponent } from '../../components/titulo-pagina/titulo-pagina.component';
 import { CategoriaGastoService } from '../../core/catalog/categoria-gasto.service';
 import { CategoriaRendaService } from '../../core/catalog/categoria-renda.service';
 import { FormImportacaoComponent } from './form-importacao/form-importacao.component';
@@ -19,7 +21,13 @@ import type { EstadoEnvio, EstadoInicialImportacao } from './data/importacao.mod
 @Component({
   selector: 'app-importacao',
   standalone: true,
-  imports: [BdPageHeaderComponent, FormImportacaoComponent, UploadExtratoComponent],
+  imports: [
+    LucideUploadCloud,
+    BarraVoltarComponent,
+    TituloPaginaComponent,
+    FormImportacaoComponent,
+    UploadExtratoComponent,
+  ],
   templateUrl: './importacao.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

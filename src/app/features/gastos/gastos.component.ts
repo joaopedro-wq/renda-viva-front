@@ -7,6 +7,7 @@ import {
   signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { LucideShoppingCart } from '@lucide/angular';
 import { forkJoin } from 'rxjs';
 import {
   BdAlertComponent,
@@ -15,11 +16,12 @@ import {
   BdEmptyStateComponent,
   BdFieldComponent,
   BdInputComponent,
-  BdPageHeaderComponent,
   BdRevealDirective,
   BdSkeletonComponent,
 } from 'bandeira-ui';
 
+import { BarraVoltarComponent } from '../../components/barra-voltar/barra-voltar.component';
+import { TituloPaginaComponent } from '../../components/titulo-pagina/titulo-pagina.component';
 import { CategoriaIconComponent } from '../../core/catalog/categoria-icon.component';
 import { CategoriaGastoService } from '../../core/catalog/categoria-gasto.service';
 import type { CategoriaGasto } from '../../core/catalog/categoria-gasto.model';
@@ -39,13 +41,15 @@ const FORM_VAZIO: GastoPayload = {
   standalone: true,
   imports: [
     FormsModule,
+    LucideShoppingCart,
+    BarraVoltarComponent,
+    TituloPaginaComponent,
     BdAlertComponent,
     BdButtonComponent,
     BdCardComponent,
     BdEmptyStateComponent,
     BdFieldComponent,
     BdInputComponent,
-    BdPageHeaderComponent,
     BdRevealDirective,
     BdSkeletonComponent,
     CategoriaIconComponent,

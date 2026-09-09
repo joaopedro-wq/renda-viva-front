@@ -10,11 +10,12 @@ import {
   BdEmptyStateComponent,
   BdFieldComponent,
   BdInputComponent,
-  BdPageHeaderComponent,
   BdRevealDirective,
   BdSkeletonComponent,
 } from 'bandeira-ui';
 
+import { BarraVoltarComponent } from '../../components/barra-voltar/barra-voltar.component';
+import { TituloPaginaComponent } from '../../components/titulo-pagina/titulo-pagina.component';
 import { ObrigacaoFixaService } from './data/obrigacao-fixa.service';
 import type { ObrigacaoFixa, ObrigacaoFixaPayload } from './data/obrigacao-fixa.model';
 
@@ -30,6 +31,8 @@ const FORM_VAZIO: ObrigacaoFixaPayload = {
   standalone: true,
   imports: [
     FormsModule,
+    BarraVoltarComponent,
+    TituloPaginaComponent,
     BdAlertComponent,
     BdButtonComponent,
     BdCardComponent,
@@ -38,7 +41,6 @@ const FORM_VAZIO: ObrigacaoFixaPayload = {
     BdEmptyStateComponent,
     BdFieldComponent,
     BdInputComponent,
-    BdPageHeaderComponent,
     BdRevealDirective,
     BdSkeletonComponent,
     LucideReceipt,
